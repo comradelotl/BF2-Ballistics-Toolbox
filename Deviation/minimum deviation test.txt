@@ -2,6 +2,9 @@ test measurements
 
 Question: what is the minimum accepted deviation accepted by minDev?
 
+Set up:
+Phallanx set to 5-round bursts
+
 minDev 0.01 collapses to zero  
 minDev 0.0100000001 zero
 minDev 0.010000001 spread

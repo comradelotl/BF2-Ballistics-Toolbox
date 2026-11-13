@@ -11,8 +11,4 @@ the 1 MOA.png showcases the minimum deviation possible in Battlefield 2.
 I've set phallanx camera to 0.00436 FOV (0.25 degree) and minDev to 0.010000001. 
 The reticle is set to 1 MOA line.
 
-
-
-
-
- 
+This extremely narrow FOV is absolutely unusable but showcases well where the engine has it's limits.  

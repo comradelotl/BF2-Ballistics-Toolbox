@@ -1,0 +1,68 @@
+minDev 1.0 test
+
+Question: how big is the spread of minDev set to 1.0?
+
+Setup: 
+Test gun: Phallanx 
+Screen resolution 1920x1080
+Camera FOV 0.17453 = 10°, or 600 MOA, or 600/1080 = 0.555 MOA per pixel.
+
+Method: 5-shot groups, measuring the pixel distance of the two most distant shots in MOA.
+
+Results: average of 104.4204819 MOA 
+
+Conclusion 0.01 is ~1 MOA
+
+Shot group results in MOA:
+79
+55.8
+119.3
+127.3
+121.4
+89.6
+133.4
+105
+135.5
+114.4
+104.2
+156.4
+164.5
+45.3
+85.5
+87.5
+152.5
+104.4
+117
+90.8
+124.6
+112.3
+82
+75.5
+53.9
+86.4
+178.9
+65.1
+77.8
+117.5
+63.2
+153.7
+118.1
+76.3
+83.5
+102.3
+144.3
+98.9
+102.3
+154.3
+96.5
+118.5
+76.6
+114.8
+62.5
+152.4
+89.9
+86.1
+122.6
+98.6
+______
+104.4204819 (avg.)

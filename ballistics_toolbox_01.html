@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BF2 Ballistics Toolbox</title>
+<style>
+:root{--bg:#f6f6f4;--card:#fff;--text:#1c1c1a;--muted:#6b6b66;--border:#d9d9d3;--accent:#2a6df4;--out:#eef3ff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#20201e;--text:#ececE8;--muted:#9a9a93;--border:#3a3a36;--accent:#6b9bff;--out:#1b2538;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#161615;--card:#20201e;--text:#ececE8;--muted:#9a9a93;--border:#3a3a36;--accent:#6b9bff;--out:#1b2538;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px}
+label{display:block;font-size:.78rem;color:var(--muted);margin:8px 0 3px}
+label.chk{display:flex;gap:6px;align-items:center;color:var(--text);font-size:.85rem}
+input,textarea,button{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;box-sizing:border-box}
+input[type=number],input[type=text]{width:100%}input[type=checkbox]{width:auto}
+#hc{width:100%}
+input#bafFile{width:100%}#fa{width:100%}
+textarea{width:100%;height:110px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace}
+button{cursor:pointer;background:var(--accent);color:#fff;border-color:transparent}button.alt{background:var(--bg);color:var(--text);border-color:var(--border)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.two>div{min-width:0}.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+canvas{width:100%;display:block;border-radius:8px;background:#222;cursor:crosshair}
+select{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px}
+select[disabled]{background:var(--out);color:var(--muted);cursor:not-allowed}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.85rem}td{padding:3px 0;border-bottom:1px solid var(--border)}td:last-child{text-align:right}
+th{text-align:left;font-size:.75rem;color:var(--muted);padding-top:10px}
+code{display:block;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--out);padding:8px;border-radius:8px;word-break:break-all}
+.note{font-size:.78rem;color:var(--muted)}h2{font-size:.9rem;margin:0 0 4px}
+.t4 td{text-align:right}.t4 td:first-child{text-align:left}
+select.w{width:100%}
+html,body{height:100%}
+main{max-width:none;height:100%;margin:0;padding:0;display:flex;flex-direction:column}
+.top{flex:none;display:flex;flex-direction:column;flex-wrap:wrap;gap:10px;align-items:flex-start;padding:8px 14px;background:var(--bg);border-bottom:1px solid var(--border)}
+.top canvas{width:auto;height:auto;max-width:100%;max-height:36vh;flex:none}
+.tnote{min-width:0;font-size:.85rem}.tnote b{font-size:1rem}
+@media(max-width:820px){.tnote{display:none}}
+.panel{flex:1;min-height:0;overflow:auto;padding:12px 14px 60px;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;align-content:start}
+.panel>.card{margin:0}
+details>summary{cursor:pointer;font-weight:600;font-size:.95rem}
+details[open]>summary{margin-bottom:6px}
+details details{margin-top:10px;border-top:1px solid var(--border);padding-top:8px}
+details details>summary{font-weight:500;font-size:.85rem;color:var(--muted)}
+input[type=range]{padding:0;width:100%}
+@media(min-width:900px){
+main{flex-direction:row}
+.top{flex:1 1 0;min-width:0;flex-direction:column;align-items:stretch;gap:8px;padding:12px 14px;border-bottom:0;border-right:1px solid var(--border);overflow:auto;display:flex}
+.top canvas{max-width:100%;flex:1 1 auto;min-height:0}
+.refpic{flex:0 0 auto}
+.tnote{display:block}
+.panel{flex:0 0 clamp(360px,32vw,500px);display:flex;flex-direction:column;gap:12px;overflow-y:auto;padding:12px 14px 60px}
+}
+.seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:10px 0 2px;width:100%}
+.seg label{flex:1;margin:0;font-size:.85rem;color:var(--text);cursor:pointer}
+.seg input{display:none}
+.seg span{display:block;text-align:center;padding:7px 4px}
+.seg input:checked+span{background:var(--accent);color:#fff}
+input[readonly]{background:var(--out)}
+input.big{font-size:1.5rem;font-weight:700;color:var(--accent)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}
+.fit{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px}
+.fit>div{min-width:0}
+.fit label{white-space:nowrap}
+.fit input{width:12ch;min-width:7ch;max-width:100%}
+@supports (field-sizing:content){.fit input{field-sizing:content;width:auto}}
+input.bad{border-color:#e5484d;box-shadow:0 0 0 1px #e5484d}
+.df.off{opacity:.55;background:var(--out)}.offtag{color:var(--muted)}
+.kdErr{color:#e5484d;font-size:.8rem;margin-top:3px}.kdWarn{color:#b7791f;font-size:.8rem;margin-top:3px}#kdOut div{margin-top:3px}
+.df{display:flex;align-items:baseline;border:1px solid var(--border);border-radius:8px;background:var(--bg);padding:6px 8px;cursor:text;overflow:hidden}
+.df:focus-within{border-color:var(--accent)}
+.df input{flex:none;width:2ch;max-width:100%;border:0;background:transparent;padding:0;outline:none;border-radius:0}
+.df .ghost{flex:none;margin-left:3px;white-space:nowrap;font-size:.78rem;color:var(--muted);opacity:.7;user-select:none;-webkit-user-select:none;pointer-events:none}
+.ghost.hide{display:none}
+/* ---- layout: canvas = stage (pure CSS fit), reference picture = bounded footer ---- */
+.stage{flex:1 1 0;min-height:0;min-width:0;width:100%;display:flex;align-items:center;justify-content:center;container-type:size}
+.top .stage canvas{--ar:1.7778;flex:none;width:min(100cqw,calc(100cqh * var(--ar)));height:auto;aspect-ratio:var(--ar);max-width:none;max-height:none;min-height:0}
+.top .refpic{flex:0 1 auto;width:100%;max-height:34vh;overflow:auto}
+.top .tnote{flex:none}
+@media(max-width:899px){.stage{flex:none;height:36vh}}
+/* ---- bigger canvas: 8px margin on every side, compact reference footer ---- */
+@media(min-width:900px){
+.top{padding:8px;gap:8px}
+.panel{flex:0 0 clamp(340px,28vw,440px)}
+.top .refpic{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.5fr);gap:2px 10px!important;padding:0!important;max-height:16vh;overflow:auto;align-items:start}
+.refpic>h2{grid-column:1/3;grid-row:1;margin:0!important}
+.refpic>div:nth-of-type(1){grid-column:1/3;grid-row:2}
+.refpic>div:nth-of-type(2){grid-column:1;grid-row:3}
+.refpic>div:nth-of-type(3){grid-column:2;grid-row:3}
+.refpic>#scale{grid-column:3;grid-row:1/4}
+.refpic label{margin:2px 0 1px}
+}
+
+/* Estimate drag: headline-sized summary + extra space below; nested example dropdown stays quiet */
+details.kd{margin-bottom:18px;padding-bottom:6px}
+details.kd>summary{font-weight:600;font-size:.95rem;color:var(--text)}
+details.kdx{margin:10px 0}
+details.kdx>summary{font-weight:500;font-size:.8rem;color:var(--muted)}
+details.kdx pre.kdpre{margin:4px 0 0;overflow:auto;max-height:220px;border-radius:8px}
+details.kdx pre.kdpre code{white-space:pre;word-break:normal;user-select:text;-webkit-user-select:text;cursor:text}
+
+/* ---- phone / narrow layout (<900px): whole page scrolls, canvas stays pinned, reference picture is a collapsed card at the end ---- */
+@media(max-width:899px){
+html,body{height:auto}
+main{display:flex;flex-direction:column;height:auto;min-height:100vh}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:20}
+.top{display:contents}
+.tnote{display:none!important}
+.top .stage{order:0;position:sticky;top:env(safe-area-inset-top,0px);z-index:10;flex:none;height:auto;container-type:normal;box-sizing:border-box;padding:6px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
+.top .stage canvas{width:min(100%,calc(26vh*var(--ar)));height:auto;aspect-ratio:var(--ar)}
+.panel{order:1;flex:none;min-height:auto;overflow:visible;padding:10px 10px 12px;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
+.top .refpic{order:2;flex:none;max-height:none;overflow:visible;margin:0 10px 40px;padding:8px 12px!important;border:1px solid var(--border);border-radius:12px;background:var(--card);box-sizing:border-box;width:auto}
+.top .refpic:not(.open)>*:not(h2){display:none!important}
+.refpic>h2{cursor:pointer;user-select:none;-webkit-user-select:none;padding:6px 0;margin:0!important;font-size:.95rem}
+.refpic>h2::after{content:" \25B8";color:var(--muted)}
+.refpic.open>h2::after{content:" \25BE"}
+details>summary{padding:4px 0}
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not(.big),select{font-size:16px}
+}
+@media(max-width:899px) and (max-height:520px){
+.top .stage{position:static}
+.top .stage canvas{width:min(100%,calc(60vh*var(--ar)))}
+}
+</style>
+</head>
+<body>
+<main>
+<div class="top">
+  <div class="stage"><canvas id="cv" width="1920" height="1080"></canvas></div>
+  <div class="refpic" style="display:flex;flex-direction:column;gap:6px;padding:6px 4px;min-width:0">
+  <h2 style="margin:2px 0">Reference picture</h2>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input id="fa" type="file" accept="image/*"><button class="alt" id="faClr">Clear picture</button><button class="alt" id="dlp">Download overlay (DXT5 DDS, 800 × 600)</button><label class="chk"><input id="cf" type="checkbox">Show 800x600 HUD overlay </label><span class="note" id="dlmsg"></span></div>
+  <div><label for="W">Width (px)</label><input id="W" type="number" value="1920" style="width:100%"></div>
+  <div><label for="H">Height (px)</label><input id="H" type="number" value="1080" style="width:100%"></div>
+  <div id="scale"></div>
+  </div>
+  <div class="tnote"><b>BF2 Ballistics Toolbox</b></div>
+</div>
+<div class="panel">
+<details class="card" open><summary>① Camera, Scope &amp; Zoom</summary>
+  <label for="opMag">Magnification (×)</label>
+  <input id="opMag" type="text" inputmode="decimal" placeholder="4">
+  <div class="seg"><label><input type="radio" name="ref" id="refB" checked><span>Soldier Camera FOV</span></label><label><input type="radio" name="ref" id="refA"><span>Scope Specifications</span></label></div>
+  <div id="boxA">
+    <div class="two"><div><label for="opTfov">True FOV</label><div class="row"><input id="opTfov" type="text" inputmode="decimal" style="width:100%"><select id="opUnit"><option value="deg">°</option><option value="m1000">m/1000 m</option><option value="ft1000">ft/1000 yd</option><option value="m100">m/100 m</option><option value="ft100">ft/100 yd</option><option value="mm">m @ m</option><option value="ftyd">ft @ yd</option></select></div></div><div><label for="opAfov">Apparent FOV (°)</label><input id="opAfov" type="text" inputmode="decimal" style="width:100%"></div></div>
+    <div id="opDistBox" style="display:none"><label for="opDist">TFOV measured at distance (m or yd)</label><input id="opDist" type="text" inputmode="decimal"></div>
+    <p class="note">Any two of Magnification, TFOV and AFOV give the third.</p>
+  </div>
+  <div id="boxB" class="two" style="display:none">
+    <div><label for="gmBase">Soldier camera FOV (rad)</label><input id="gmBase" type="number" step="any" value="1.1"></div>
+    <div><label for="gmBaseD">(degree)</label><input id="gmBaseD" type="number" step="any" value="63.0254"></div>
+  </div>
+  <label class="chk"><input id="orc" type="checkbox"> FOV modifier(α): 1 = screen, 0 = AFOV</label>
+  <div class="two"><input id="gmSlide" type="range" min="0" max="1" step="0.01" value="1"><input id="gmAlpha" type="number" step="any" min="0" value="1"></div>
+
+  <div class="two"><div><label for="fovr">addZoomFactor (rad)</label><input id="fovr" class="big" readonly style="width:14ch"></div><div><label for="fov">Vertical FOV (°)</label><input id="fov" class="big" readonly style="width:14ch"></div></div>
+  <div id="gmOut"></div>
+  <p class="note" id="gmStatus"></p>
+
+  <details><summary>Magnification table</summary><div id="gmTab"></div></details>
+</details>
+
+<details class="card"><summary>② Mildot Reticle</summary>
+  <label class="chk"><input id="sc" type="checkbox"> Enable</label>
+  <div class="two">
+    <div><label for="sr">Scope radius (px)</label><input id="sr" type="number" min="1" value="540"></div>
+    <div><label for="ms">Dot spacing (mil)</label><input id="ms" type="number" step="any" min="0.01" value="1"></div>
+    <div><label for="mt">Mil type</label><select id="mt"><option value="mrad">Mrad</option><option value="nato">NATO mil (1/6400)</option><option value="war">Warsaw pact mil (1/6000)</option><option value="moa">MOA (1/60°)</option></select></div>
+  </div>
+  <div class="seg"><label><input type="radio" name="dt" value="circle"><span>Dots</span></label><label><input type="radio" name="dt" value="line" checked><span>Lines</span></label></div>
+  <p class="note"></p>
+</details>
+
+<details class="card"><summary>③ Bullet Drop Compensation</summary>
+  <label class="chk"><input id="bk" type="checkbox" checked> Draw Ladder</label>
+  <div class="two">
+    <div><label for="bv">Projectile velocity (m/s)</label><input id="bv" type="number" step="any" value="800"></div>
+    <div><label for="bg">gravityModifier</label><span class="df"><input id="bg" type="text" inputmode="decimal" value="1"><span class="ghost" id="bgGhost">(BF2 default)</span></span></div>
+    <div><label for="bf">BF2 base gravity</label><input id="bf" type="text" inputmode="decimal" value="1.5" readonly title="9.81x 1.5"></div>
+    <div><label for="bm">Projectile mass (kg)<span id="bmOff" class="offtag" hidden> · off (drag = 0)</span></label><span class="df"><input id="bm" type="text" inputmode="decimal" min="0" value="1"><span class="ghost" id="bmGhost">(BF2 default)</span></span></div>
+    <div><label for="bdr">Drag</label><span class="df"><input id="bdr" type="text" inputmode="decimal" min="0" value="0"><span class="ghost" id="bdrGhost">(BF2 default)</span></span></div>
+    <div><label for="bord">BF2 bullet calculation (30 ticks/s)</label><select class="w" id="bord" disabled title="Update order of physics calculations. Instead of a smooth continuous application of parameters, the engine applies them first once per server tick and moves the projectile then to the next point. This leads to a slightly larger bullet drop"><option value="vel">Velocity first</option><option value="move">Move first</option><option value="smooth">Smooth (continuous)</option></select></div>
+    <div class="seg" style="grid-column:1/-1"><label><input type="radio" name="fc" id="fcSingle" checked><span>SingleFireComp</span></label><label><input type="radio" name="fc" id="fcMulti"><span>MultiFireComp</span></label></div>
+    <div><label for="be">Barrel elevation (°)</label><input id="be" type="number" step="any" value="0" readonly title="Derived from the zero range"></div>
+    <div><label for="bz">Zero point (m)</label><input id="bz" type="number" step="any" value="0" readonly></div>
+    <input id="hk" type="hidden" value="1.0217">
+    <div><label for="hc">Camerabone/mesh1 relative offset</label><input id="hc" type="number" step="any" value="0" readonly></div>
+    <div><label for="hrx">relative rotation (°)</label><input id="hrx" type="number" step="any" value="0" readonly></div>
+    <div style="grid-column:1/-1"><label for="bafFile">Read offset from _zoom_stand.baf</label><input id="bafFile" type="file" accept=".baf" disabled></div>
+    <div style="grid-column:1/-1"><label for="br">Marks at range (m)</label><input id="br" type="text" value="400,800,1200"></div>
+  </div>
+  <details class="kdx" id="kdBox"><summary>How To Implement</summary>
+    <!-- EXAMPLE CODE: replace the lines inside <code id="kdCode"> below with the example snippet (one line per row, keep it HTML-escaped: &lt; &gt; &amp;) -->
+    <pre class="kdpre"><code id="kdCode">ObjectTemplate.createComponent MultiFireComp <- important
+ObjectTemplate.fire.addBarrelName usrif_m24_barrel
+...
+ObjectTemplate.addTemplate usrif_m24_barrel
+ObjectTemplate.setRotation 0/<span id="kdRot">-0.2</span>/0
+ObjectTemplate.setPosition 0/0/0
+...
+ObjectTemplate.create Bundle usrif_m24_barrel
+ObjectTemplate.createdInEditor 1
+ObjectTemplate.floaterMod 0
+ObjectTemplate.hasMobilePhysics 0
+</code></pre>
+    <div class="btns"><button class="alt" id="kdCopy" type="button">Copy code</button><span class="note" id="kdCopyMsg"></span></div>
+  </details>
+  <details class="kd"><summary>Drag estimation</summary>
+    <div class="two"><div><label for="kdRU">Distance unit</label><select class="w" id="kdRU"><option value="m">Metres</option><option value="yd">Yards</option></select></div><div><label for="kdDU">Drop unit</label><select class="w" id="kdDU"><option value="mrad">Mrad</option><option value="nato">Mil (NATO 1/6400)</option><option value="moa">MOA</option><option value="in">Inches</option></select></div></div>
+    <div class="two"><div><label for="kdR1">Range A (m)</label><input id="kdR1" type="text" inputmode="decimal" value="300"></div><div><label for="kdD1">Drop A (mrad)</label><input id="kdD1" type="text" inputmode="decimal" value="1.5"></div></div>
+    <div class="two"><div><label for="kdR2">Range B (m)</label><input id="kdR2" type="text" inputmode="decimal" value="600"></div><div><label for="kdD2">Drop B (mrad)</label><input id="kdD2" type="text" inputmode="decimal" value="4.0"></div></div>
+    <div class="two"><div><label for="kdMass">Mass (g, optional)</label><input id="kdMass" type="text" inputmode="decimal" value="9.8"></div></div>
+    <p class="note"></p>
+    <div class="btns"><button class="alt" id="kdSolve">Solve drag/mass</button><label class="chk"><input id="kdApply" type="checkbox"> APPLY</label></div>
+    <div id="kdOut" class="note"></div>
+  </details>
+  <div id="bt"></div>
+</details>
+
+<details class="card"><summary>④ Stadiametric Rangefinder</summary>
+  <div class="two">
+    <div>
+      <label class="chk"><input id="rf" type="checkbox" checked> Enable infantry</label>
+      <div><label for="rfi">Left: infantry target height (m)</label><input id="rfi" type="number" step="any" min="0" value="1.8"></div>
+    </div>
+    <div>
+      <label class="chk"><input id="rftk" type="checkbox"> Enable tank</label>
+      <div><label for="rft">Right: tank target height (m)</label><input id="rft" type="number" step="any" min="0" value="2.7"></div>
+    </div>
+    <div style="grid-column:1/-1"><label for="rfr">Ranges (hundreds of m)</label><input id="rfr" type="text" value="2,4,6,8,10"></div>
+  </div>
+  <div id="rfTab"></div>
+</details>
+
+<details class="card"><summary>⑤ Geometric Estimation</summary>
+  <label class="chk"><input id="msE" type="checkbox"> Enable</label>
+  <p class="note">Upload a referene picture of the view through a scope. Draw by hand the scope's inner edge and a reference object.</p>
+  <div class="seg full"><label><input type="radio" name="msm" value="dia" checked><span>Draw Scope Diameter</span></label><label><input type="radio" name="msm" value="obj"><span>Measure Object</span></label></div>
+  <div class="seg"><label><input type="radio" name="ops" value="op1" checked><span>estimate object size</span></label><label><input type="radio" name="ops" value="op2"><span>estimate FOV</span></label><label><input type="radio" name="ops" value="op3"><span>estimate distance</span></label></div>
+  <div id="msList"></div>
+  <div id="msOut"></div>
+  <div id="moList"></div>
+  <div id="moOut"></div>
+  <p class="note" id="msSt"></p>
+  <div id="opInputs"></div>
+  <div class="btns"><button class="alt" id="msC">Clear measurements</button></div>
+</details>
+
+<details class="card"><summary>⑥ Shot Group &amp; MOA Calculator</summary>
+  <label class="chk"><input id="sg" type="checkbox"> Enable</label>
+  <p class="note">Click to add an impact, click an impact to remove it. Green cross: crosshair. Yellow circle: RMS radius.</p>
+  <label for="gs">Group size (click order, 0 = one group)</label><input id="gs" type="number" min="0" value="0">
+  <div id="out"></div>
+  <label for="csv">Points (x,y per line, optional group)</label>
+  <textarea id="csv" spellcheck="false"></textarea>
+  <div class="btns"><button class="alt" id="apply">Apply points</button><button class="alt" id="cp">Copy CSV</button><button class="alt" id="clr">Clear points</button></div>
+  <label>Command for shotgroup.py</label><code id="cmd"></code>
+</details>
+
+<details class="card"><summary>⑦ Deviation</summary>
+  <p class="note">Get a minDev from a given effective range and target size.</p>
+  <div class="two">
+    <div><label for="erM">Soldier-sized target (m)</label><input id="erM" type="text" inputmode="decimal" autocomplete="off" value="0.45"></div>
+    <div><label for="erT">Tank-sized target (m)</label><input id="erT" type="text" inputmode="decimal" autocomplete="off" value="2"></div>
+  </div>
+  <label for="erR">Effective range (m)</label><input id="erR" type="text" inputmode="decimal" autocomplete="off" value="300">
+  <label for="erP">Hit chance per shot (%)</label><input id="erP" type="text" inputmode="decimal" autocomplete="off" value="85">
+  <div id="erOut"></div>
+  <p class="note"><b>Extreme spread MOA (ES):</b><br> Diameter of the circle within which a typical shot will land<br><b>RMS MOA:</b><br>Typical distance a shot will land from the aimpoint centre <br> <br>minDev = 1.0 ~ 100 ES MOA or ~50 RMS MOA.<br>minDev = 0.01 or smaller will collapse to zero deviation.<br> <br><b>Hit chance:</b><br>Probability that a single shot lands on the target (a square) when aimed at its centre. Assumes round bell-curve scatter with an RMS of 50 MOA at minDev 1.0. Aiming error, bullet drop and target movement are not included.</p>
+</details>
+
+</div>
+</main>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var A=null,pts=[],W=1920,H=1080,cv=$("cv"),ctx=cv.getContext("2d"),R2D=180/Math.PI;
+function num(i){var v=parseFloat(String($(i).value).replace(",","."));return isFinite(v)?v:0}
+function resetDefaults(){
+  var s=function(i,v){var e=$(i);if(e){e.value=v}};
+  var c=function(i,v){var e=$(i);if(e){e.checked=v}};
+  s("opMag","");s("opTfov","6");s("opAfov","");s("opDist","");
+  s("W","1920");s("H","1080");
+  s("gmBase","1.1");s("gmBaseD","63.0254");s("gmAlpha","1");s("gmSlide","1");
+  s("bv","800");s("bg","1");s("bm","1");s("bdr","0");s("bz","0");s("hc","0");s("hrx","0");
+  s("hk","1.0217");s("br","400,800,1200");s("fovr","");s("fov","");
+  c("bk",true);c("rf",true);c("rftk",false);c("fcSingle",true);c("fcMulti",false);c("orc",false);c("refB",true);c("refA",false);
+  c("scf",true);c("cf",false);
+  $("opUnit").value="deg";$("bord").value="vel";
+  ghostUpdate();
+}
+$("fa").onchange=function(e){var f=e.target.files[0];if(!f)return;var im=new Image();im.onload=function(){A=im;$("W").value=im.width;$("H").value=im.height;solveAll()};im.src=URL.createObjectURL(f)};
+$("faClr").onclick=function(){$("fa").value="";A=null;$("W").value="1920";$("H").value="1080";solveAll()};
+var _lastW=0,_lastH=0;
+function size(){var nw=num("W")||1920,nh=num("H")||1080;if(nw===_lastW&&nh===_lastH)return;W=nw;H=nh;cv.width=W;cv.height=H;cv.style.setProperty("--ar",W/H);_lastW=W;_lastH=H}
+function fit(){}
+function mean(a){return a.reduce(function(s,v){return s+v},0)/a.length}
+function pct(a,q){var s=a.slice().sort(function(x,y){return x-y}),k=(s.length-1)*q,lo=Math.floor(k),hi=Math.ceil(k);return s[lo]+(s[hi]-s[lo])*(k-lo)}
+function fpx(){var v=num("fov");return v>0&&v<180?(H/2)/Math.tan(v/2/R2D):1}
+function M(px){return Math.atan(px/fpx())*R2D*60}
+function MIL(px){return Math.atan(px/fpx())*milPerRad()}
+function milName(){var t=$("mt").value;return t==="mrad"?"mrad":t==="nato"?"NATO":t==="war"?"Warsaw pact":"MOA"}
+function milType(){var t=$("mt").value;return t==="nato"?6400:t==="war"?6000:t==="moa"?21600:2000*Math.PI}
+function milPerRad(){return milType()/(2*Math.PI)}
+function fm(px){return M(px).toFixed(1)+" MOA ("+MIL(px).toFixed(2)+" mil)"}
+function groupsOf(){var g=parseInt($("gs").value)||0,o={};pts.forEach(function(p,i){var k=g>0?Math.floor(i/g):0;(o[k]=o[k]||[]).push(p)});return o}
+function row(k,v){return "<tr><td>"+k+"</td><td>"+v+"</td></tr>"}
+function head(t){return "<tr><th colspan=2>"+t+"</th></tr>"}
+
+function ballistic(){var v=num("bv"),g=9.81*num("bf")*num("bg"),al=(num("be")+num("hrx"))/R2D,c=Math.cos(al);return{v:v,g:g,c:c,s:Math.sin(al),d:dragK(),o:$("bord").value,t:Math.tan(al),h:-num("hc")*num("hk")}}
+function sim(b,xmax){var dt=1/30,X=[0],Y=[0],x=0,y=0,vx=b.v*b.c,vy=b.v*b.s,n=0,mf=b.o==="move";
+  while(x<xmax&&n++<4000&&y>-5000){
+    if(b.o==="smooth"){var kd=b.d*dt;if(kd<1e-9){x+=vx*dt;y+=vy*dt-b.g*dt*dt/2;vy-=b.g*dt}else{var e=Math.exp(-kd),w=vy+b.g/b.d;x+=vx*(1-e)/b.d;y+=w*(1-e)/b.d-b.g*dt/b.d;vx*=e;vy=w*e-b.g/b.d}}
+    else if(mf){x+=vx*dt;y+=vy*dt;vx-=b.d*vx*dt;vy-=(b.d*vy+b.g)*dt}
+    else{vx-=b.d*vx*dt;vy-=(b.d*vy+b.g)*dt;x+=vx*dt;y+=vy*dt}
+    if(!(vx>0))break;X.push(x);Y.push(y)}
+  return{X:X,Y:Y}}
+function yAt(S,x){var X=S.X,Y=S.Y,n=X.length,lo=0,hi=n-1,m;if(!(x>=0)||x>X[n-1])return NaN;
+  while(hi-lo>1){m=(lo+hi)>>1;if(X[m]<=x)lo=m;else hi=m}
+  return hi===lo?Y[lo]:Y[lo]+(Y[hi]-Y[lo])*(x-X[lo])/(X[hi]-X[lo])}
+function hold(b,x){if(x>0){var y=yAt(sim(b,x),x);return isFinite(y)?1000*(b.h-y)/x:NaN}
+  if(b.h!==0)return NaN;var S=sim(b,1e-9);return S.X.length>1?-1000*S.Y[1]/S.X[1]:NaN}
+function zeroRange(b){if(!(b.g>0&&b.v>0))return 0;var S=sim(b,1e9),X=S.X,Y=S.Y,pv=-b.h,i,v;
+  for(i=1;i<X.length;i++){v=Y[i]-b.h;if(pv>=0&&v<0)return X[i-1]+(X[i]-X[i-1])*pv/(pv-v);pv=v}
+  return NaN}
+function zeroDeg(){var R=num("bz"),h=-num("hc")*num("hk");if(!(num("bv")>0&&R>=0))return null;if(R===0)return h!==0?null:0;return solveDeg(R);}
+function solveDeg(R,b0){b0=b0||ballistic();var lo=-45,hi=89,i,m1,m2,a,c,
+  F=function(d){var al=d/R2D,y=yAt(sim({v:b0.v,g:b0.g,d:b0.d,o:b0.o,c:Math.cos(al),s:Math.sin(al)},R),R);return isFinite(y)?y-b0.h:-1e9};
+  for(i=0;i<50;i++){m1=lo+(hi-lo)/3;m2=hi-(hi-lo)/3;if(F(m1)<F(m2))lo=m1;else hi=m2}
+  c=(lo+hi)/2;if(F(c)<0)return null;a=-45;if(F(a)>=0)return a;
+  for(i=0;i<50;i++){m1=(a+c)/2;if(F(m1)<0)a=m1;else c=m1}
+  return(a+c)/2}
+
+function dragK(){var m=num("bm")>0?num("bm"):1;return Math.PI*.01*Math.max(num("bdr"),0)/m}
+function holdK(v,k,x,bg,bf){var b0={v:v,g:9.81*bf*bg,d:k,o:"vel",h:-num("hc")*num("hk")},R=num("bz"),deg=R>0?solveDeg(R,b0):(b0.h===0?0:null);if(deg===null)return NaN;var al=deg/R2D,b={v:v,g:b0.g,d:k,o:"vel",c:Math.cos(al),s:Math.sin(al),h:b0.h},y=yAt(sim(b,x),x);return isFinite(y)?1000*(b.h-y)/x:NaN}
+function solveDropMatch(v,r1,d1,r2,d2,bgO){
+  if(!(v>0)||!(r1>0)||!(r2>0)||r1===r2||!isFinite(d1)||!isFinite(d2))return{k:0,error:Infinity,approx:true};
+  var bg=bgO!=null?bgO:num("bg"),bf=num("bf");
+  function err(k){var p1=holdK(v,k,r1,bg,bf),p2=holdK(v,k,r2,bg,bf);if(!isFinite(p1)||!isFinite(p2))return Infinity;return(p1-d1)*(p1-d1)+(p2-d2)*(p2-d2)}
+  var bestK=0,bestErr=err(0),k=0.001,i,GR=1.5;
+  for(i=0;i<60&&k<1e6;i++){var e=err(k);if(!isFinite(e))break;if(e<bestErr){bestErr=e;bestK=k}k*=GR}
+  /* golden-section search inside the bracket around the best grid point */
+  var lo=bestK>0.001?bestK/GR:0,hi=bestK>0?bestK*GR:0.001,ph=(Math.sqrt(5)-1)/2,x1=hi-ph*(hi-lo),x2=lo+ph*(hi-lo),f1=err(x1),f2=err(x2);
+  if(!isFinite(f1))f1=Infinity;if(!isFinite(f2))f2=Infinity;
+  for(i=0;i<80;i++){
+    if(f1<f2){hi=x2;x2=x1;f2=f1;x1=hi-ph*(hi-lo);f1=err(x1);if(!isFinite(f1))f1=Infinity}
+    else{lo=x1;x1=x2;f1=f2;x2=lo+ph*(hi-lo);f2=err(x2);if(!isFinite(f2))f2=Infinity}
+  }
+  var kk=(lo+hi)/2,ke=err(kk);if(isFinite(ke)&&ke<bestErr){bestErr=ke;bestK=kk}
+  return{k:bestK,error:bestErr,approx:bestErr>1e-4};
+}
+function drawMarks(c,sc,cx,cy,pm,lim){
+  var bb=ballistic();
+  c.font=(12*sc)+"px system-ui,sans-serif";c.textBaseline="middle";
+  ranges().forEach(function(x){
+    var m=hold(bb,x);if(!isFinite(m))return;
+    var y=cy+m*pm;
+    if(Math.abs(y-cy)>lim)return;
+    var hw=Math.round(Math.max(.75*pm,6*sc)),tx=cx+hw+4*sc,yr=Math.floor(y);
+    c.fillStyle="#ffdf00";c.fillRect(Math.round(cx)-hw,yr,2*hw,1);
+    c.lineWidth=3*sc;c.strokeStyle="rgba(0,0,0,.7)";c.strokeText(String(x),tx,yr+.5);c.fillStyle="#ffdf00";c.fillText(String(x),tx,yr+.5);
+  });
+}
+function rfRanges(){return $("rfr").value.split(",").map(parseFloat).filter(function(x){return isFinite(x)&&x>0}).map(function(x){return x*100})}
+function pmMrad(){return fpx()/1000}
+function drawStadia(c,sc,cx,cy,pm,lim,doInf,doTank){
+  var rs=rfRanges(),off=110*sc,step=26*sc,cap=4*sc,pmg=(pm!=null?pm:pmMrad()),sides=[];
+  if(doInf!==false)sides.push([-1,num("rfi")]);
+  if(doTank!==false)sides.push([1,num("rft")]);
+  sides.forEach(function(sd){
+    var first=true;
+    rs.forEach(function(x,i){
+      var bx=Math.round(cx+sd[0]*(off+i*step)),y=cy-1000*sd[1]/x*pmg,top=Math.floor(y);
+      if(y<6*sc||Math.hypot(bx-cx,y-cy)>lim)return;
+      c.fillStyle="#ffdf00";c.fillRect(bx,top,1,Math.floor(cy)-top+1);
+      c.fillRect(bx-cap,top,2*cap+1,1);c.fillRect(bx-cap,Math.floor(cy),2*cap+1,1);
+      c.textAlign="center";c.textBaseline="bottom";c.lineWidth=3*sc;c.strokeStyle="rgba(0,0,0,.7)";
+      c.strokeText(String(x/100),bx+.5,top-2*sc);c.fillText(String(x/100),bx+.5,top-2*sc);
+      if(first){c.textBaseline="top";c.strokeText(sd[1]+" m",bx+.5,cy+4*sc);c.fillText(sd[1]+" m",bx+.5,cy+4*sc);first=false}
+    });
+    c.textAlign="start";c.textBaseline="middle"});
+}
+function ranges(){return $("br").value.split(",").map(parseFloat).filter(function(x){return isFinite(x)&&x>=0})}
+function ballTable(){
+  var rt=ballistic(),pm=fpx()/1000,h="<table>"+row("Effective gravity",rt.g.toFixed(2)+" m/s²")+(rt.d>0?row("Drag k = π·0.01·drag/mass",rt.d.toFixed(5)+" 1/s")+row("Horizontal range limit (≈)",(rt.v*rt.c/rt.d).toFixed(0)+" m"):"")+row("Bone offset (m)",rt.h.toFixed(4))+row("Texture px per mil (800 × 600)",(pm*600/H).toFixed(2))+row("0 m mark",(function(m){return isFinite(m)?(-m).toFixed(2)+" mil above crosshair":"n/a (offset)"})(hold(rt,0)))+row("Far zero point",(function(z){return isFinite(z)?z.toFixed(1)+" m":"–"})(zeroRange(rt)))+head("Range: hold from crosshair");
+  ranges().forEach(function(x){var m=hold(rt,x);if(!isFinite(m)){h+=row(x+" m","n/a");return}h+=row(x+" m",Math.abs(m).toFixed(2)+" mil "+(m<0?"above":"below")+" / "+Math.abs(m*pm).toFixed(1)+" px")});
+  $("bt").innerHTML=h+"</table>";
+  var rr=rfRanges(),t="";
+  if($("rf").checked&&rr.length){t="<table>"+head("Rangefinder: infantry target height (mil)");
+    rr.forEach(function(x){t+=row(x+" m",(1000*num("rfi")/x).toFixed(2)+" · "+(1000*num("rfi")/x*pm).toFixed(1)+" px")});t+="</table>"}
+  if($("rftk").checked&&rr.length){t+="<table>"+head("Rangefinder: tank target height (mil)");
+    rr.forEach(function(x){t+=row(x+" m",(1000*num("rft")/x).toFixed(2)+" · "+(1000*num("rft")/x*pm).toFixed(1)+" px")});t+="</table>"}
+  $("rfTab").innerHTML=t;
+}
+function scale(){
+  var f=fpx(),h="<table>"+head("Scale at this FOV")+row("Focal length",f.toFixed(0)+" px")+
+   row("1 px",M(1).toFixed(3)+" MOA / "+MIL(1).toFixed(3)+" mil")+
+   row("1 mil",(f/milPerRad()).toFixed(2)+" px")+row("1 MOA",(f/3437.747).toFixed(2)+" px");
+   if($("sc").checked){var r=num("sr"),a=2*Math.atan(r/f);h+=row("Scope FOV (diameter)",(a*R2D).toFixed(2)+"° / "+(a*milPerRad()).toFixed(0)+" mil")}
+  $("scale").innerHTML=h+"</table>";
+}
+function stats(){
+  var o=$("out"),n=pts.length;
+  if(n<2){o.innerHTML="<span class=note>Add at least 2 impacts.</span>";return}
+  var cx=W/2,cy=H/2,r=pts.map(function(p){return Math.hypot(p.x-cx,p.y-cy)});
+  var mx=mean(pts.map(function(p){return p.x-cx})),my=mean(pts.map(function(p){return p.y-cy}));
+  var rms=Math.sqrt(mean(r.map(function(v){return v*v})));
+  var g=groupsOf(),sx=0,sy=0,dof=0,es=[];
+  Object.keys(g).forEach(function(k){
+    var q=g[k];if(q.length<2)return;
+    var qx=mean(q.map(function(p){return p.x})),qy=mean(q.map(function(p){return p.y})),m=0;
+    q.forEach(function(p){sx+=Math.pow(p.x-qx,2);sy+=Math.pow(p.y-qy,2)});
+    dof+=q.length-1;
+    for(var i=0;i<q.length;i++)for(var j=i+1;j<q.length;j++)m=Math.max(m,Math.hypot(q[i].x-q[j].x,q[i].y-q[j].y));
+    es.push(m);
+  });
+  var h="<table>"+row("Shots",n)+head("MPI offset (y &gt; 0 = below crosshair)")+
+   row("x",mx.toFixed(1)+" px / "+M(mx).toFixed(1)+" MOA")+row("y",my.toFixed(1)+" px / "+M(my).toFixed(1)+" MOA")+
+   head("Radius about crosshair")+
+   row("Mean",M(mean(r)).toFixed(1)+" MOA")+row("Median",M(pct(r,.5)).toFixed(1)+" MOA")+row("RMS",fm(rms))+
+   row("P90",M(pct(r,.9)).toFixed(1)+" MOA")+row("P95",M(pct(r,.95)).toFixed(1)+" MOA");
+  if(dof){
+    h+=head("About each group’s own centre (bias-corrected)")+
+     row("RMS radius",fm(Math.sqrt((sx+sy)/dof)))+
+     row("σ x / σ y",M(Math.sqrt(sx/dof)).toFixed(1)+" / "+M(Math.sqrt(sy/dof)).toFixed(1)+" MOA")+
+     head("Extreme spread, "+es.length+" group(s)")+
+     row("Mean",fm(mean(es)))+row("Max",fm(Math.max.apply(null,es)));
+  }
+  o.innerHTML=h+"</table>";
+}
+function cmd(){
+  $("cmd").textContent="python shotgroup.py --points points.csv --size "+W+"x"+H+" --fov "+num("fov")+" --center "+W/2+","+H/2;
+}
+function csvOut(){var g=parseInt($("gs").value)||0;return "x,y,group\n"+pts.map(function(p,i){return p.x.toFixed(1)+","+p.y.toFixed(1)+","+(g>0?Math.floor(i/g):0)}).join("\n")}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  if(A){var iw=A.naturalWidth||W,ih=A.naturalHeight||H,k=Math.min(W/iw,H/ih),w=iw*k,h=ih*k;ctx.drawImage(A,(W-w)/2,(H-h)/2,w,h);}else{ctx.fillStyle="#222";ctx.fillRect(0,0,W,H)}
+  var rc=cv.getBoundingClientRect(),sc=rc.width?W/rc.width:1,cx=W/2,cy=H/2,pm=fpx()/milPerRad();
+  if($("sc").checked){drawReticle(ctx,sc,cx,cy,pm,Math.max(num("sr"),1))}
+  if($("orc").checked&&OPT_R>0){
+  ctx.save();ctx.setLineDash([10*sc,6*sc]);ctx.strokeStyle="#ff9f1a";ctx.lineWidth=2*sc;
+  ctx.beginPath();ctx.arc(cx,cy,OPT_R,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.font=(12*sc)+"px system-ui,sans-serif";ctx.fillStyle="#ff9f1a";ctx.textAlign="center";ctx.textBaseline="bottom";
+  ctx.fillText("ingame scope FOV",cx,cy-OPT_R-4*sc);ctx.restore();
+  }
+  if($("bk").checked){drawMarks(ctx,sc,cx,cy,fpx()/1000,$("sc").checked?num("sr"):Infinity)}
+  if($("rf").checked||$("rftk").checked){drawStadia(ctx,sc,cx,cy,fpx()/1000,Infinity,$("rf").checked,$("rftk").checked)}
+  if($("cf").checked){var cw=H*4/3;ctx.save();ctx.setLineDash([8*sc,6*sc]);ctx.strokeStyle="#0cf";ctx.lineWidth=1.5*sc;ctx.strokeRect(cx-cw/2,cy-H/2,cw,H);ctx.restore()}
+  ctx.lineWidth=1.5*sc;ctx.strokeStyle="#0f0";ctx.beginPath();
+  ctx.moveTo(cx-15*sc,cy);ctx.lineTo(cx+15*sc,cy);ctx.moveTo(cx,cy-15*sc);ctx.lineTo(cx,cy+15*sc);ctx.stroke();
+  if($("sg").checked){ctx.strokeStyle="#f33";pts.forEach(function(p){ctx.beginPath();ctx.arc(p.x,p.y,5*sc,0,Math.PI*2);ctx.stroke()})};
+  ctx.strokeStyle="#0cf";ctx.fillStyle="#0cf";ctx.lineWidth=1.5*sc;ctx.font=(12*sc)+"px system-ui,sans-serif";ctx.textAlign="start";ctx.textBaseline="bottom";
+  if(MSD){ctx.beginPath();ctx.moveTo(MSD.a.x,MSD.a.y);ctx.lineTo(MSD.b.x,MSD.b.y);ctx.stroke();ctx.fillStyle="#f0f";ctx.fillText("scope Ø",(MSD.a.x+MSD.b.x)/2+6*sc,(MSD.a.y+MSD.b.y)/2-4*sc)}
+  if(MSD){var scC=scopeCentre();ctx.strokeStyle="#ff0";ctx.fillStyle="#ff0";ctx.lineWidth=1.5*sc;
+  ctx.beginPath();ctx.moveTo(scC.x-8*sc,scC.y);ctx.lineTo(scC.x+8*sc,scC.y);ctx.moveTo(scC.x,scC.y-8*sc);ctx.lineTo(scC.x,scC.y+8*sc);ctx.stroke();
+  var gr=msScopeD>0?msScopeD/2:num("sr");
+  if(gr>0){ctx.beginPath();ctx.arc(scC.x,scC.y,gr,0,Math.PI*2);ctx.stroke()}}
+  if(msP){ctx.beginPath();ctx.arc(msP.x,msP.y,5*sc,0,Math.PI*2);ctx.stroke()}
+  ctx.strokeStyle=ctx.fillStyle="#fa0";mo.forEach(function(m,i){ctx.beginPath();ctx.moveTo(m.a.x,m.a.y);ctx.lineTo(m.b.x,m.b.y);ctx.stroke();[m.a,m.b].forEach(function(p){ctx.beginPath();ctx.arc(p.x,p.y,3*sc,0,Math.PI*2);ctx.stroke()});ctx.fillText("O"+(i+1),(m.a.x+m.b.x)/2+6*sc,(m.a.y+m.b.y)/2-4*sc)});
+  if(pts.length>1){
+    var rms=Math.sqrt(mean(pts.map(function(p){return Math.pow(p.x-cx,2)+Math.pow(p.y-cy,2)})));
+    ctx.strokeStyle="#fd0";ctx.beginPath();ctx.arc(cx,cy,rms,0,Math.PI*2);ctx.stroke();
+  }
+}
+function all(){size();draw();scale();ballTable();flag();stats();cmd();$("csv").value=csvOut();moCalc();fit()}
+
+cv.addEventListener("mousedown",function(e){
+  if(e.button!==0)return;
+  var rc=cv.getBoundingClientRect(),sc=W/rc.width,x=(e.clientX-rc.left)*sc,y=(e.clientY-rc.top)*sc;
+  dragStart={x:x,y:y};
+  var md=$("msE").checked?msMode():"off";
+  if(md==="dia"||md==="obj"){var h=hitPoint(x,y);if(h){msP=null;drag=h;draw();return}}
+  cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener("mousemove",function(e){
+  if(!drag)return;
+  var rc=cv.getBoundingClientRect(),sc=W/rc.width,x=(e.clientX-rc.left)*sc,y=(e.clientY-rc.top)*sc;
+  applyDrag(x,y);draw();moCalc();msRender();
+});
+window.addEventListener("mousemove",function(e){
+  if(!drag)return;
+  var rc=cv.getBoundingClientRect(),sc=W/rc.width,x=(e.clientX-rc.left)*sc,y=(e.clientY-rc.top)*sc;
+  applyDrag(x,y);draw();moCalc();msRender();
+});
+window.addEventListener("mouseup",function(e){
+  if(e.button!==0)return;
+  var rc=cv.getBoundingClientRect(),sc=W/rc.width,x=(e.clientX-rc.left)*sc,y=(e.clientY-rc.top)*sc;
+  if(drag){drag=null;dragStart=null;try{cv.releasePointerCapture&&cv.releasePointerCapture(e.pointerId)}catch(e){}all();return}
+  if(!dragStart){return}
+  var moved=Math.hypot(x-dragStart.x,y-dragStart.y)>4;
+  dragStart=null;
+  try{cv.releasePointerCapture&&cv.releasePointerCapture(e.pointerId)}catch(e){}
+  if(moved)return;
+  var md=$("msE").checked?msMode():"off";
+  if(md==="dia"||md==="obj"){msClick(x,y);return}
+  if($("sg").checked){var hit=-1;
+    pts.forEach(function(p,i){if(Math.hypot(p.x-x,p.y-y)<9*sc)hit=i});
+    if(hit>=0)pts.splice(hit,1);else pts.push({x:x,y:y});
+    all()}
+});
+$("clr").onclick=function(){if(!$("sg").checked)return;pts=[];all()};
+$("apply").onclick=function(){
+  if(!$("sg").checked)return;
+  pts=$("csv").value.split(/\n/).map(function(l){var t=l.split(",").map(parseFloat);return{x:t[0],y:t[1]}}).filter(function(p){return isFinite(p.x)&&isFinite(p.y)});
+  all();
+};
+$("cp").onclick=function(){try{navigator.clipboard.writeText($("csv").value)}catch(e){$("csv").select()}};
+function elevFromZero(){var z=zeroDeg();if(z===null){$("be").value="";$("kdRot").textContent="-";return false}$("be").value=+(z-num("hrx")).toFixed(4);$("kdRot").textContent=(-num("be")).toFixed(4);return true}
+function fcUpdate(){
+  var multi=$("fcMulti").checked;
+  $("be").readOnly=true;
+  $("bz").readOnly=!multi;
+  $("hc").readOnly=!multi;
+  $("bafFile").disabled=!multi;
+  if(!multi){$("bz").value="0";$("hc").value="0";$("hrx").value="0";$("be").value="0";$("kdRot").textContent="-0";$("kdBox").style.display="none";flag();}
+  else{$("kdBox").style.display="";$("bz").value="100";$("hc").value="-0.1";elevFromZero();}
+  all();
+}
+$("fcSingle").addEventListener("change",fcUpdate);
+$("fcMulti").addEventListener("change",fcUpdate);
+function flag(){var bad=zeroDeg()===null;$("bz").classList.toggle("bad",bad);
+  $("bz").title=bad?(num("bz")===0?"A zero at 0 m is undefined with a bone offset":"Beyond the maximum range for this velocity"):""}
+function drawReticle(c,sc,cx,cy,pm,r){
+  r=Math.max(r,1);
+  c.save();
+  c.beginPath();c.rect(0,0,c.canvas.width,c.canvas.height);c.arc(cx,cy,r,0,Math.PI*2);c.clip("evenodd");
+  c.fillStyle="rgba(0,0,0,.55)";c.fillRect(0,0,c.canvas.width,c.canvas.height);
+  c.restore();
+  c.strokeStyle="rgba(255,255,255,.7)";c.lineWidth=1.5*sc;c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.stroke();
+  if(!(pm>0))return;
+  c.strokeStyle="rgba(255,255,255,.8)";c.lineWidth=1*sc;c.beginPath();
+  c.moveTo(cx-r,cy);c.lineTo(cx+r,cy);c.moveTo(cx,cy-r);c.lineTo(cx,cy+r);c.stroke();
+  var step=Math.max(num("ms"),.01)*pm,dr=Math.max(.1*pm,2*sc);
+  c.fillStyle="#fff";
+  var dt=document.querySelector("input[name=dt]:checked"),lineMode=dt?dt.value==="line":false;
+  for(var k=1;k<=2000&&k*step<=r-dr;k++){
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){
+      var px=cx+d[0]*k*step,py=cy+d[1]*k*step;
+      if(lineMode){c.strokeStyle="#fff";c.lineWidth=Math.max(0.03*pm,1*sc);c.beginPath();if(d[1]===0){c.moveTo(px,py-0.5*pm);c.lineTo(px,py+0.5*pm)}else{c.moveTo(px-0.5*pm,py);c.lineTo(px+0.5*pm,py)}c.stroke()}
+      else{c.beginPath();c.arc(px,py,dr,0,Math.PI*2);c.fill()}
+    });
+  }
+}
+function renderTex(){
+  var c=document.createElement("canvas"),s=600/H;c.width=800;c.height=600;
+  var g=c.getContext("2d"),cx=400,cy=300,pmM=fpx()/1000*s,pmU=fpx()/milPerRad()*s;
+  if($("sc").checked){drawReticle(g,1,cx,cy,pmU,num("sr")*s)}
+  if($("bk").checked){drawMarks(g,1,cx,cy,pmM,$("sc").checked?num("sr")*s:Infinity)}
+  if($("rf").checked||$("rftk").checked){drawStadia(g,1,cx,cy,pmM,Infinity,$("rf").checked,$("rftk").checked)}
+  return c;
+}
+function p565(v){return(((v[0]*31+127)/255|0)<<11)|(((v[1]*63+127)/255|0)<<5)|((v[2]*31+127)/255|0)}
+function u565(c){var r=(c>>11)&31,g=(c>>5)&63,b=c&31;return[r<<3|r>>2,g<<2|g>>4,b<<3|b>>2]}
+function mix3(a,b,wa,wb){return[((wa*a[0]+wb*b[0])/3)|0,((wa*a[1]+wb*b[1])/3)|0,((wa*a[2]+wb*b[2])/3)|0]}
+function encodeDxt5(cv){
+  var w=cv.width,h=cv.height,px=cv.getContext("2d").getImageData(0,0,w,h).data;
+  var bw=Math.ceil(w/4),bh=Math.ceil(h/4),out=new Uint8Array(128+bw*bh*16),dv=new DataView(out.buffer);
+  out[0]=68;out[1]=68;out[2]=83;out[3]=32;
+  dv.setUint32(4,124,true);dv.setUint32(8,0x81007,true);
+  dv.setUint32(12,h,true);dv.setUint32(16,w,true);dv.setUint32(20,bw*bh*16,true);
+  dv.setUint32(76,32,true);dv.setUint32(80,4,true);
+  out[84]=68;out[85]=88;out[86]=84;out[87]=53;
+  dv.setUint32(108,0x1000,true);
+  var o=128;
+  for(var by=0;by<bh;by++)for(var bx=0;bx<bw;bx++){
+    var R=[],G=[],B=[],A=[],i,k=0,x,y;
+    for(y=0;y<4;y++)for(x=0;x<4;x++){var sx=Math.min(bx*4+x,w-1),sy=Math.min(by*4+y,h-1),j=(sy*w+sx)*4;R[k]=px[j];G[k]=px[j+1];B[k]=px[j+2];A[k]=px[j+3];k++}
+    var a0=Math.max.apply(null,A),a1=Math.min.apply(null,A),pal=[a0,a1],lo=0,hi=0;
+    if(a0>a1)for(i=1;i<7;i++)pal.push(((7-i)*a0+i*a1)/7);
+    for(k=0;k<16;k++){
+      var best=0,bd=1e9;
+      if(a0>a1)for(i=0;i<8;i++){var d=Math.abs(A[k]-pal[i]);if(d<bd){bd=d;best=i}}
+      if(k<8)lo|=best<<(3*k);else hi|=best<<(3*(k-8));
+    }
+    out[o]=a0;out[o+1]=a1;out[o+2]=lo&255;out[o+3]=(lo>>8)&255;out[o+4]=(lo>>16)&255;out[o+5]=hi&255;out[o+6]=(hi>>8)&255;out[o+7]=(hi>>16)&255;
+    var mn=[255,255,255],mx=[0,0,0],n=0;
+    for(k=0;k<16;k++)if(A[k]>0){n++;mn=[Math.min(mn[0],R[k]),Math.min(mn[1],G[k]),Math.min(mn[2],B[k])];mx=[Math.max(mx[0],R[k]),Math.max(mx[1],G[k]),Math.max(mx[2],B[k])]}
+    if(!n){mn=[255,221,0];mx=[255,221,0]}
+    var c0=p565(mx),c1=p565(mn),t;
+    if(c0<c1){t=c0;c0=c1;c1=t}
+    var e0=u565(c0),e1=u565(c1),cp=[e0,e1,mix3(e0,e1,2,1),mix3(e0,e1,1,2)],ci=0;
+    if(c0!==c1)for(k=0;k<16;k++){
+      var bi=0,b2=1e9;
+      if(A[k]>0)for(i=0;i<4;i++){var dr=R[k]-cp[i][0],dg=G[k]-cp[i][1],db=B[k]-cp[i][2],dd=dr*dr+dg*dg+db*db;if(dd<b2){b2=dd;bi=i}}
+      ci=(ci|(bi<<(2*k)))>>>0;
+    }
+    out[o+8]=c0&255;out[o+9]=c0>>8;out[o+10]=c1&255;out[o+11]=c1>>8;
+    out[o+12]=ci&255;out[o+13]=(ci>>>8)&255;out[o+14]=(ci>>>16)&255;out[o+15]=(ci>>>24)&255;
+    o+=16;
+  }
+  return out;
+}
+function savePng(){
+  var c=renderTex();
+  var blob=new Blob([encodeDxt5(c)],{type:"application/octet-stream"}),msg=$("dlmsg");msg.textContent="";
+  {
+    Promise.resolve(window.claude&&window.claude.use?window.claude.use("downloads"):null).catch(function(){return null}).then(function(dl){
+      if(dl)return dl.save({filename:"ballistic-marks-800x600.dds",data:blob}).then(function(){msg.textContent="Saved."},function(e){msg.textContent=e&&e.code==="declined"?"":"Could not save: "+(e&&e.message||"unavailable")});
+      var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ballistic-marks-800x600.dds";document.body.appendChild(a);a.click();a.remove();
+    });
+  }
+}
+$("bz").addEventListener("input",function(){if(elevFromZero()){all();return}$("be").value="";$("bt").innerHTML="<span class=note>"+(num("bz")===0&&num("hc")*num("hk")!==0?"A zero at 0 m is undefined with a bone offset.":"No elevation reaches this zero range.")+"</span>";flag();all()});
+["bv","bg","bm","bdr","hc","hk","hrx"].forEach(function(i){$(i).addEventListener("input",function(){if(elevFromZero()){all();ghostUpdate();return}$("be").value="";$("bt").innerHTML="<span class=note>Invalid zero</span>";flag();all();ghostUpdate()})});
+function ghostUpdate(){
+  [["bg",1],["bm",1],["bdr",0]].forEach(function(d){
+    var e=$(d[0]),t=e.value||e.placeholder||"";
+    var tx=e.value.trim().replace(",",".");$(d[0]+"Ghost").classList.toggle("hide",!(tx!==""&&Number(tx)===d[1]));
+    e.style.width=((t.length||1)+.5)+"ch";
+  });
+  var off=!(num("bdr")>0);$("bm").parentElement.classList.toggle("off",off);$("bmOff").hidden=!off;
+}
+ghostUpdate();
+document.querySelectorAll(".df").forEach(function(w){var i=w.firstElementChild,fresh=false;
+  i.addEventListener("focus",function(){fresh=true;i.select()});
+  i.addEventListener("mouseup",function(e){if(fresh){e.preventDefault();fresh=false}});
+  w.addEventListener("mousedown",function(e){if(e.target!==i){e.preventDefault();i.focus();i.select()}})});
+[["hc",-0.1],["hrx",0],["hk",1.0217],["bm",1],["bdr",0],["bz",100],["rfi",1.8],["rft",2.7],["bg",1]].forEach(function(d){var e=$(d[0]);e.placeholder=d[1];e.addEventListener("change",function(){if(!isFinite(parseFloat(e.value))){e.value=d[1];if(elevFromZero()){all();ghostUpdate();return}$("be").value="";flag();ghostUpdate()}})});
+$("dlp").onclick=savePng;
+var KD_GRAV=0.6667,KD_MOA=1000*2*Math.PI/21600,KD_NATO=1000*2*Math.PI/6400,KD_YD=0.9144,KD_IN=0.0254,kdPrevDU="mrad",kdPrevRU="m",kdErrShown=false;
+function kdP(id){var t=String($(id).value).trim().replace(",",".");if(t==="")return{e:"empty"};if(!/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(t))return{e:"invalid"};return{v:Number(t)}}
+function kdRm(r,ru){return ru==="yd"?r*KD_YD:r}
+function kdToMrad(d,rm,du){return du==="nato"?d*KD_NATO:du==="moa"?d*KD_MOA:du==="in"?d*KD_IN/rm*1000:d}
+function kdFromMrad(m,rm,du){return du==="nato"?m/KD_NATO:du==="moa"?m/KD_MOA:du==="in"?m*rm/1000/KD_IN:m}
+function kdUN(du){return du==="nato"?"mil":du==="moa"?"MOA":du==="in"?"in":"mrad"}
+function kdLabels(){var un=$("kdRU").value==="yd"?"yd":"m",dn=kdUN($("kdDU").value);
+  [["kdR1","Range A ("+un+")"],["kdD1","Drop A ("+dn+")"],["kdR2","Range B ("+un+")"],["kdD2","Drop B ("+dn+")"]].forEach(function(p){document.querySelector("label[for="+p[0]+"]").textContent=p[1]})}
+function kdRender(errs,warns,main){kdErrShown=errs.length>0;
+  $("kdOut").innerHTML=errs.map(function(m){return "<div class=kdErr>⚠ "+m+"</div>"}).join("")+main+warns.map(function(m){return "<div class=kdWarn>"+m+"</div>"}).join("")}
+function kdCheck(){
+  var errs=[],F={},nm={kdR1:"Range A",kdD1:"Drop A",kdR2:"Range B",kdD2:"Drop B",kdMass:"Mass"};
+  function bad(id,msg){errs.push(msg);$(id).classList.add("bad");$(id).title=msg}
+  Object.keys(nm).forEach(function(id){F[id]=kdP(id);$(id).classList.remove("bad");$(id).title=""});
+  ["kdR1","kdR2"].forEach(function(id){var p=F[id];if(p.e==="empty")bad(id,nm[id]+" is empty.");else if(p.e)bad(id,nm[id]+" is not a number.");else if(!(p.v>0))bad(id,nm[id]+" must be greater than 0.")});
+  ["kdD1","kdD2"].forEach(function(id){var p=F[id];if(p.e==="empty")bad(id,nm[id]+" is empty.");else if(p.e)bad(id,nm[id]+" is not a number.")});
+  if(F.kdMass.e==="invalid")bad("kdMass","Mass is not a number (leave it empty for 1000 g = 1 kg).");else if(F.kdMass.v!==undefined&&!(F.kdMass.v>0))bad("kdMass","Mass must be greater than 0 (or empty).");
+  if(F.kdR1.v>0&&F.kdR1.v===F.kdR2.v){bad("kdR1","Ranges A and B must differ.");$("kdR2").classList.add("bad");$("kdR2").title="Ranges A and B must differ."}
+  var v=num("bv");if(!(v>0)){errs.push("Projectile velocity in section ③ must be greater than 0.");$("bv").classList.add("bad")}else $("bv").classList.remove("bad");
+  flag();
+  return{errs:errs,F:F}}
+function kdLive(){var c=kdCheck();if(c.errs.length)kdRender(c.errs,[],"");else if(kdErrShown)kdRender([],[],"")}
+function kdShow(){
+  var c=kdCheck(),ru=$("kdRU").value,du=$("kdDU").value;
+  if(c.errs.length){kdRender(c.errs,[],"");return}
+  var F=c.F,rm1=kdRm(F.kdR1.v,ru),rm2=kdRm(F.kdR2.v,ru),mr1=kdToMrad(F.kdD1.v,rm1,du),mr2=kdToMrad(F.kdD2.v,rm2,du),
+      v=num("bv"),mass=F.kdMass.v>0?F.kdMass.v:0,ap=$("kdApply").checked,bgU=ap?KD_GRAV:num("bg"),bf=num("bf"),errs=[],warns=[],
+      zr=num("bz"),h0=-num("hc")*num("hk"),b0={v:v,g:9.81*bf*bgU,d:0,o:"vel",h:h0},un=ru==="yd"?"yd":"m";
+  if(!(zr>0?solveDeg(zr,b0)!==null:h0===0))errs.push("The zero range ("+zr+" m, section ③) cannot be reached at "+v+" m/s with gravity modifier "+bgU+(zr===0?" and a bone offset":"")+".");
+  else[[rm1,"A"],[rm2,"B"]].forEach(function(p){if(!isFinite(holdK(v,0,p[0],bgU,bf)))errs.push("Range "+p[1]+" is beyond what the projectile reaches.")});
+  if(errs.length){kdRender(errs,[],"");return}
+  [[rm1,"A"],[rm2,"B"]].forEach(function(p){if(zr>0&&Math.abs(p[0]-zr)<=zr*0.005)warns.push("Range "+p[1]+" equals the zero range: the drop there is always 0, so it adds no information.")});
+  var s=solveDropMatch(v,rm1,mr1,rm2,mr2,bgU),k=s.k,m=mass?mass/1000:1,drag=k*m/(Math.PI*0.01),p1=holdK(v,k,rm1,bgU,bf),p2=holdK(v,k,rm2,bgU,bf);
+  if(!isFinite(p1)||!isFinite(p2)){kdRender(["No drag value reproduces these drops."],warns,"");return}
+  var sg=function(x){return(x>=0?"+":"")+x.toFixed(2)+" "+kdUN(du)},f=function(mr,rm){return kdFromMrad(mr,rm,du).toFixed(2)+" "+kdUN(du)};
+  var main="<div>k = "+k.toFixed(6)+" 1/s · drag = "+drag.toFixed(6)+" (mass = "+(+(m*1000).toPrecision(6))+" g)"+(mass?"":" · only drag/mass is determined")+"</div>"+
+    "<div>gravity modifier "+bgU+" · predicted: "+f(p1,rm1)+" @ "+F.kdR1.v+" "+un+", "+f(p2,rm2)+" @ "+F.kdR2.v+" "+un+"</div>"+
+    "<div>"+(s.approx?"best approximation, residual A "+sg(kdFromMrad(p1-mr1,rm1,du))+", B "+sg(kdFromMrad(p2-mr2,rm2,du)):"exact match")+"</div>";
+  if(s.approx&&k<1e-9)warns.push("k is 0: the entered drops are flatter than a drag-free flight gives at these settings (check velocity, zero range, gravity, units).");
+  kdRender([],warns,main);
+  if(ap){$("bg").value=KD_GRAV;$("bm").value=+m.toPrecision(12);$("bdr").value=+drag.toFixed(6);elevFromZero();all();ghostUpdate()}}
+$("kdDU").addEventListener("change",function(){var nu=this.value,ou=kdPrevDU,ru=$("kdRU").value;
+  [["kdD1","kdR1"],["kdD2","kdR2"]].forEach(function(q){var d=kdP(q[0]),r=kdP(q[1]),rm=r.v>0?kdRm(r.v,ru):0;if(d.v===undefined||((ou==="in"||nu==="in")&&!rm))return;$(q[0]).value=+kdFromMrad(kdToMrad(d.v,rm,ou),rm,nu).toFixed(nu==="in"?3:4)});
+  kdPrevDU=nu;kdLabels();kdShow()});
+$("kdRU").addEventListener("change",function(){var nu=this.value,ou=kdPrevRU;
+  ["kdR1","kdR2"].forEach(function(id){var p=kdP(id);if(p.v===undefined)return;var rm=kdRm(p.v,ou);$(id).value=+(nu==="yd"?rm/KD_YD:rm).toFixed(4)});
+  kdPrevRU=nu;kdLabels();kdShow()});
+$("kdSolve").onclick=kdShow;
+["kdR1","kdD1","kdR2","kdD2","kdMass","kdApply"].forEach(function(i){$(i).addEventListener("change",kdShow)});
+["kdR1","kdD1","kdR2","kdD2","kdMass"].forEach(function(i){$(i).addEventListener("input",kdLive)});
+["gs","W","H","sc","sr","ms","bk","br","cf","rf","rfi","rft","rftk","rfr","orc"].forEach(function(i){
+  $(i).addEventListener("input",all);$(i).addEventListener("change",all);
+});
+window.addEventListener("resize",function(){fit();draw()});
+var DEG=Math.PI/180,DEF_A=23.68,DEF_M=4;
+var OPT_R=0;
+function pn(i){var e=$(i),x=e?parseFloat(String(e.value).replace(",",".")):NaN;return isFinite(x)&&x>0?x:null}
+function tfovDeg(){var v=pn("opTfov");if(v===null)return null;var u=$("opUnit").value;if(u==="deg")return v;
+  var k={m1000:2000,ft1000:6000,m100:200,ft100:600}[u];if(k)return 2*Math.atan(v/k)/DEG;
+  var d=pn("opDist");if(d===null)return null;return 2*Math.atan(v/(2*d*(u==="ftyd"?3:1)))/DEG}
+function exact(){return true}
+function magFrom(T,a){return exact()?Math.tan(a*DEG/2)/Math.tan(T*DEG/2):a/T}
+function afovFrom(T,m){return exact()?2*Math.atan(m*Math.tan(T*DEG/2))/DEG:m*T}
+function tfovFrom(a,m){return exact()?2*Math.atan(Math.tan(a*DEG/2)/m)/DEG:a/m}
+function H0(){return num("H")||1080}
+function pxMil(fr){return H0()/2/Math.tan(fr/2)/milPerRad()}
+function tfovWrite(Td){if(Td==null||!isFinite(Td))return null;var u=$("opUnit").value;if(u==="deg")return +Td.toFixed(3);
+  var k={m1000:2000,ft1000:6000,m100:200,ft100:600}[u];if(k)return +(k*Math.tan(Td*DEG/2)).toFixed(2);
+  var d=pn("opDist");return d?+(2*d*(u==="ftyd"?3:1)*Math.tan(Td*DEG/2)).toFixed(2):null}
+function solveModel(){
+  OPT_R=0;
+  var base=$("refB").checked,eM=pn("opMag"),O=pn("opObj"),E=pn("opEp"),T=base?null:tfovDeg(),eA=base?null:pn("opAfov"),b=pn("gmBase"),al=parseFloat($("gmAlpha").value),st="";
+  var mv=parseFloat(String($("opMag").value).replace(",","."));
+  $("opMag").classList.toggle("bad",$("opMag").value!==""&&(!isFinite(mv)||mv<=0));
+  if(!isFinite(al)||al<0)al=1;if(eA&&eA>=180){eA=null;$("opAfov").classList.add("bad");$("opAfov").title="AFOV must be < 180°"}else{$("opAfov").classList.remove("bad");$("opAfov").title=""}
+  var tb=b&&b<Math.PI?Math.tan(b/2):null;
+  if(base&&!tb){$("gmStatus").textContent="Base FOV must be between 0 and π rad.";return}
+  var mag,src,ref,rs,Tr;
+  if(eM){mag=eM;src="entered"}
+  else if(T&&eA){mag=magFrom(T,eA);src="TFOV + AFOV"}
+  else if(O&&E){mag=O/E;src="objective ÷ exit pupil"}
+  else if(T){mag=magFrom(T,DEF_A);src="TFOV, default AFOV"}
+  else{mag=DEF_M;src="default"}
+  if(base)ref=b;
+  else{
+    rs=eA?"given":T?"derived":"default";ref=eA||(T?afovFrom(T,mag):DEF_A);
+    if(!(ref>0&&ref<180)){ref=DEF_A;rs="default"}
+    Tr=T||tfovFrom(ref,mag);
+    if(eM&&T&&eA&&Math.abs(magFrom(T,eA)/eM-1)>.03)st="Inputs disagree: TFOV + AFOV give "+magFrom(T,eA).toFixed(2)+"×, entered "+eM+"× is used.";
+  }
+  var mg=Math.pow(mag,al),fr=base?2*Math.atan(tb/mg):tfovFrom(ref,mg)*DEG,
+      cap=(b&&b<Math.PI?b:1.1)-0.001;
+  if(fr>cap){fr=cap;st=(st?st+" ":"")+"addZoomFactor capped at "+cap.toFixed(3)+" rad (base FOV − 0.001)."}
+  $("fovr").value=+fr.toFixed(5);$("fov").value=+(fr/DEG).toFixed(5);
+  if(!base&&$("orc").checked&&al<=1){OPT_R=H0()/2*Math.tan(tfovFrom(ref,mag)*DEG/2)/Math.tan(fr/2)}else{OPT_R=0}
+  $("opMag").placeholder=eM?"":+mag.toFixed(2)+" ("+src+")";
+  var wt=T?null:tfovWrite(Tr);
+  $("opTfov").placeholder=wt===null?"":wt+" (derived)";
+  $("opAfov").placeholder=eA||base?"":rs==="default"?"23.68 (PSO-1 ex.)":+ref.toFixed(2)+" ("+rs+")";
+  var te=$("opTfov").value!=="",ae=$("opAfov").value!=="",me=$("opMag").value!=="";
+  $("opTfov").readOnly=!te&&me&&ae;
+  $("opAfov").readOnly=!ae&&me&&te;
+  $("opMag").readOnly=!me&&te&&ae;
+  var h="<table>"+row("Magnification",+mag.toFixed(3)+"× ("+src+")")+(base?row("Base camera FOV",b.toFixed(5)+" rad"):row("True FOV",+Tr.toFixed(4)+"°"+(T?"":" (derived)"))+row("AFOV ("+rs+")",ref.toFixed(2)+"°"))+row("Game magnification (M^α, α = "+al+")",mg.toFixed(3)+"×")+(OPT_R>0?row("Ingame scope FOV radius on screen",OPT_R.toFixed(0)+" px ("+(OPT_R/(H0()/2)*100).toFixed(0)+" % of half height)"):"")+row("Focal length",(H0()/2/Math.tan(fr/2)).toFixed(0)+" px")+row("1 mil",pxMil(fr).toFixed(2)+" px ("+milName()+")");
+  $("gmOut").innerHTML=h+"</table>";$("gmStatus").textContent=st;
+  var t="<table class=t4><tr><th>Real ×</th><th>Modified ×</th><th>FOV rad</th><th>FOV °</th><th>px / "+milName().toUpperCase()+"</th></tr>";
+  [2,3,4,6,8,10,12,20].forEach(function(m){var g=Math.pow(m,al),f=Math.min(base?2*Math.atan(tb/g):tfovFrom(ref,g)*DEG,cap);t+="<tr><td>"+m+"×</td><td>"+g.toFixed(2)+"×</td><td>"+f.toFixed(5)+"</td><td>"+(f/DEG).toFixed(2)+"</td><td>"+pxMil(f).toFixed(2)+"</td></tr>"});
+  $("gmTab").innerHTML=t+"</table>";
+}
+function solveAll(){
+  var b=$("refB").checked;$("gmSlide").value=Math.min(parseFloat($("gmAlpha").value)||0,1);
+  $("boxA").style.display=b?"none":"";$("boxB").style.display=b?"":"none";
+  solveModel();all();
+}
+["opMag","opTfov","opUnit","opDist","opAfov","gmBase","gmAlpha","H","refA","refB","sr"].forEach(function(i){$(i).addEventListener("input",solveAll);$(i).addEventListener("change",solveAll)});
+document.querySelectorAll("input[name=dt]").forEach(function(r){r.addEventListener("change",all)});
+$("mt").addEventListener("change",function(){solveAll()});
+$("gmBase").addEventListener("input",function(){$("gmBaseD").value=+(num("gmBase")/DEG).toFixed(4)});
+$("gmBaseD").addEventListener("input",function(){$("gmBase").value=+(num("gmBaseD")*DEG).toFixed(6);solveAll()});
+$("gmSlide").addEventListener("input",function(){$("gmAlpha").value=this.value;solveAll()});
+$("opUnit").addEventListener("change",function(){$("opDistBox").style.display=(this.value==="mm"||this.value==="ftyd")?"":"none"});
+function orcUpdate(){
+  var on=$("orc").checked;
+  $("gmSlide").disabled=!on;
+  $("gmAlpha").disabled=!on;
+  if(!on)$("gmAlpha").value=1;
+  solveAll();
+}
+$("orc").onchange=orcUpdate;
+$("orc").addEventListener("input",orcUpdate);
+function preset(v){["opMag","opTfov","opAfov","opDist"].forEach(function(i){$(i).value=v[i]||""});$("opUnit").value="deg";$("opDistBox").style.display="none";$("refA").checked=true;solveAll()}
+// ==== BAF bone-offset reader (ports read_bone_offset.py, no Blender) ====
+// Blender "Weapon bone offset Y" = -engine-Z. Rig (1p_setup.ske) is constant.
+var BAF_REST = {
+  Camerabone: {q:[0,0,0,1],p:[-0.023999998345971107,1.6122242212295532,-0.04499761015176773],parent:-1,idx:0},
+  torus:      {q:[0.01959601417183876,0,0,0.9998080134391785],p:[-5.722911933674676e-16,1.3562263250350952,-0.07309248298406601],parent:-1,idx:1},
+  mesh1:      {q:[-0.01959613338112831,0,0,0.9998080134391785],p:[5.722911933674676e-16,-1.3523207902908325,0.12617942690849304],parent:1,idx:54}
+};
+var CALIB_OFFSET = 0.0;
+function bafQuatMat(q){
+  var x=q[0],y=q[1],z=q[2],w=q[3],n=x*x+y*y+z*z+w*w;
+  if(n<1e-12){x=0;y=0;z=0;w=1;n=1;}
+  var s=2/n,xs=x*s,ys=y*s,zs=z*s,wx=w*xs,wy=w*ys,wz=w*zs,xx=x*xs,yy=y*ys,zz=z*zs,xy=x*ys,xz=x*zs,yz=y*zs;
+  return [[1-(yy+zz),xy-wz,xz+wy,0],[xy+wz,1-(xx+zz),yz-wx,0],[xz-wy,yz+wx,1-(xx+yy),0],[0,0,0,1]];
+}
+function bafTranslateMat(p){return [[1,0,0,p[0]],[0,1,0,p[1]],[0,0,1,p[2]],[0,0,0,1]];}
+function bafMatMul(a,b){var r=[];for(var i=0;i<4;i++){r[i]=[];for(var j=0;j<4;j++){var s=0;for(var k=0;k<4;k++)s+=a[i][k]*b[k][j];r[i][j]=s;}}return r;}
+function bafMatInvRigid(m){
+  var r=[[m[0][0],m[1][0],m[2][0]],[m[0][1],m[1][1],m[2][1]],[m[0][2],m[1][2],m[2][2]]],t=[m[0][3],m[1][3],m[2][3]];
+  var nt=[-r[0][0]*t[0]-r[0][1]*t[1]-r[0][2]*t[2],-r[1][0]*t[0]-r[1][1]*t[1]-r[1][2]*t[2],-r[2][0]*t[0]-r[2][1]*t[1]-r[2][2]*t[2]];
+  return [[r[0][0],r[0][1],r[0][2],nt[0]],[r[1][0],r[1][1],r[1][2],nt[1]],[r[2][0],r[2][1],r[2][2],nt[2]],[0,0,0,1]];
+}
+function bafLocalMat(q,p){return bafMatMul(bafTranslateMat(p),bafQuatMat(q));}
+function bafDecodeFixed16(word,precision){
+  // int16 sign conversion: subtract 0x10000 for values >= 0x8000. Kept 0xFFFF to
+  // match read_bone_offset.py; verify against Python before changing.
+  var mult=32767/(1<<(15-precision)),signed=word;
+  if(signed>32767)signed-=0xFFFF;
+  return signed/mult;
+}
+function bafChainNames(restName){
+  // idxMap key 68 ("mesh1") is stale vs BAF_REST.mesh1.idx (54); only keys 0 and 1
+  // are ever looked up, so harmless today but one of the two should be corrected.
+  var chain=[],cur=restName,idxMap={0:"Camerabone",1:"torus",68:"mesh1"};
+  while(cur!==null){chain.push(cur);var par=BAF_REST[cur].parent;if(par<0)break;cur=idxMap[par];if(cur===undefined)break;}
+  return chain;
+}
+function bafWorldPose(restName,tracks,frame){
+  var world=null,chain=bafChainNames(restName);
+  for(var i=chain.length-1;i>=0;i--){
+    var name=chain[i],inf=BAF_REST[name],local=bafLocalMat(inf.q,inf.p);
+    if(tracks[inf.idx]!==undefined&&frame<tracks[inf.idx].length){
+      var fr=tracks[inf.idx][frame];local=bafLocalMat([fr.rot[0],fr.rot[1],fr.rot[2],fr.rot[3]],[fr.pos[0],fr.pos[1],fr.pos[2]]);
+    }
+    world=world===null?local:bafMatMul(world,local);
+  }
+  return world;
+}
+function bafEulerX(m){return -Math.atan2(m[2][1],m[2][2])*R2D;}
+function readBafBoneOffset(buf,frame){
+  var d=new Uint8Array(buf),pos=0;
+  function dword(){var v=new DataView(d.buffer,d.byteOffset).getUint32(pos,true);pos+=4;return v;}
+  function word(){var v=new DataView(d.buffer,d.byteOffset).getUint16(pos,true);pos+=2;return v;}
+  function byt(){return d[pos++];}
+  var version=dword(),boneNum=word(),boneIds=[];
+  for(var i=0;i<boneNum;i++)boneIds.push(word());
+  var frameCount=dword(),precision=byt();
+  if(frameCount<0||frameCount>65536)return null;
+  if(frameCount===0)return null;
+  var tracks={};
+  try{
+  for(var b=0;b<boneNum;b++){
+    var bid=boneIds[b],frames=[];
+    for(var f=0;f<frameCount;f++)frames.push({rot:[0,0,0,1],pos:[0,0,0]});
+    tracks[bid]=frames;
+    word(); // data_size
+    for(var ch=1;ch<=7;ch++){
+      var cur=0,dataLeft=word();
+      while(dataLeft>0){
+        var head=byt(),rle=(head&0x80)!==0,nf=head&0x7F,nxt=byt(),val=rle?word():0;
+        for(var i=0;i<nf;i++){
+          if(!rle)val=word();
+          if(cur>=frameCount)return null;
+          var fr=tracks[bid][cur],prec=ch<=4?15:precision,v=bafDecodeFixed16(val,prec);
+          if(ch===1)fr.rot[0]=-v;else if(ch===2)fr.rot[1]=-v;else if(ch===3)fr.rot[2]=-v;
+          else if(ch===4)fr.rot[3]=v;else if(ch===5)fr.pos[0]=v;else if(ch===6)fr.pos[1]=v;else if(ch===7)fr.pos[2]=v;
+          cur++;
+        }
+        dataLeft-=nxt;
+      }
+    }
+  }}catch(e){return null;}
+  var f=Math.min(Math.max(frame||0,0),frameCount-1);
+  var ref=bafWorldPose("Camerabone",tracks,f),tgt=bafWorldPose("mesh1",tracks,f);
+  var rel=bafMatMul(bafMatInvRigid(ref),tgt);
+  return {y:rel[1][3]+CALIB_OFFSET,xDeg:bafEulerX(rel)};
+}
+$("bafFile").onchange=function(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();r.onload=function(ev){
+    var r2=readBafBoneOffset(ev.target.result,0);
+    if(r2===null){$("hc").value="";$("hrx").value="";$("bt").innerHTML="<span class=note>Invalid BAF file.</span>";e.target.value="";return;}
+    $("hc").value=+r2.y.toFixed(6);$("hrx").value=+r2.xDeg.toFixed(4);$("bt").innerHTML="";if(elevFromZero()){all();}
+    e.target.value="";
+  };r.readAsArrayBuffer(f);
+};
+// ==== Reference-picture measurement management ====
+var MSD=null,mo=[],msP=null,scopeC=null,scopeManual=false,drag=null,dragStart=null,msScopeD=0;
+function msNum(s){var x=parseFloat(String(s).replace(",","."));return isFinite(x)&&x>0?x:null}
+function msLen(m){return Math.hypot(m.b.x-m.a.x,m.b.y-m.a.y)}
+function scopeCentre(){
+  if(scopeManual&&scopeC)return scopeC;
+  if(MSD)return{x:(MSD.a.x+MSD.b.x)/2,y:(MSD.a.y+MSD.b.y)/2};
+  if(A){var iw=A.naturalWidth||W,ih=A.naturalHeight||H,k=Math.min(W/iw,H/ih),w=iw*k,h=ih*k;return{x:(W-w)/2+iw*k/2,y:(H-h)/2+ih*k/2}};
+  return{x:W/2,y:H/2}}
+function msAngPx(m,f){var c=scopeCentre(),cx=c.x,cy=c.y,ux=m.a.x-cx,uy=m.a.y-cy,wx=m.b.x-cx,wy=m.b.y-cy,a=f*(uy-wy),b=f*(wx-ux),c2=ux*wy-uy*wx;return Math.atan2(Math.sqrt(a*a+b*b+c2*c2),ux*wx+uy*wy+f*f)}
+function msMode(){if(!$("msE").checked)return"off";var r=document.querySelector("input[name=msm]:checked");return r?r.value:"off"}
+function opMode(){var r=document.querySelector("input[name=ops]:checked");return r?r.value:"op1"}
+function hitPoint(x,y){
+  var r=10*(W/cv.getBoundingClientRect().width),h;
+  if(MSD){if(Math.hypot(MSD.a.x-x,MSD.a.y-y)<r)return{t:"msd",e:"a"};if(Math.hypot(MSD.b.x-x,MSD.b.y-y)<r)return{t:"msd",e:"b"}}
+  for(var i=0;i<mo.length;i++){if(Math.hypot(mo[i].a.x-x,mo[i].a.y-y)<r)return{t:"mo",i:i,e:"a"};if(Math.hypot(mo[i].b.x-x,mo[i].b.y-y)<r)return{t:"mo",i:i,e:"b"}}
+  return null}
+function applyDrag(x,y){
+  if(drag.t==="msd"){MSD[drag.e]={x:x,y:y};msScopeD=msLen(MSD)}else{mo[drag.i][drag.e]={x:x,y:y}}
+}
+function msClick(x,y){
+  var md=msMode();
+  if(md==="off")return;
+  if(!msP){msP={x:x,y:y};draw();return}
+  var a=msP,b={x:x,y:y};msP=null;
+  if(md==="dia"){MSD={a:a,b:b};msScopeD=msLen(MSD);$("msSt").textContent="Scope Ø = "+msScopeD.toFixed(1)+" px (radius "+(msScopeD/2).toFixed(1)+" px).";msRender();moRender();return}
+  if(md==="obj"){mo.push({a:a,b:b});moRender();return}
+}
+function msRender(){
+  $("msList").innerHTML=MSD?"<div style='border-top:1px solid var(--border);padding:4px 0'><span><b>Scope Ø</b> · "+msLen(MSD).toFixed(1)+" px</span><button class='alt msx'>×</button></div>":"";
+  $("msOut").innerHTML=MSD?"<span class=note>Scope diameter: "+msLen(MSD).toFixed(1)+" px</span>":"";
+  moRender()}
+function moF(){
+  var opFv=$("opFv"),v=opFv?msNum(opFv.value):0;
+  if(!MSD||!v||v>=180)return 0;
+  var d=msLen(MSD)/2;return d/Math.tan(v*DEG/2)
+}
+function moCalc(){
+  var opR=$("opR"),opS=$("opS"),opFv=$("opFv"),cs=document.querySelectorAll("#moList .mz"),why="";
+  var R=opR?msNum(opR.value):0,f=moF(),size=opS?msNum(opS.value):0,om=opMode();
+  if(!MSD)why="Measure the scope diameter first (click both ends of the scope circle).";
+  else if(om==="op1"&&!f)why="Enter a known FOV.";
+  else if(om==="op1"&&!R)why="Enter the range to target.";
+  else if(om==="op2"&&!R)why="Enter the range to target.";
+  else if(om==="op2"&&!size)why="Enter a known object size.";
+  else if(om==="op3"&&!f)why="Enter a known FOV.";
+  else if(om==="op3"&&!size)why="Enter a known object size.";
+  mo.forEach(function(m,i){if(!cs[i])return;var a=0;
+    if(!why){
+      if(om==="op1"||om==="op3"){a=msAngPx(m,f)}
+      else if(om==="op2"){var ang=2*Math.atan(size/(2*R));f=msLen(m)/2/Math.tan(ang/2);a=ang}
+    }
+    cs[i].textContent=why?"–":(2*R*Math.tan(a/2)).toFixed(3)+" m · "+(a*milPerRad()).toFixed(2)+" mil"});
+  var note="";
+  if(!why&&mo.length){
+    if(om==="op1")note="Object size: "+(2*R*Math.tan(msAngPx(mo[0],f)/2)).toFixed(3)+" m";
+    else if(om==="op2")note="FOV: "+(2*Math.atan((msLen(MSD)/2)/f)/DEG).toFixed(3)+"°";
+    else if(om==="op3")note="Range: "+(size/(2*Math.tan(msAngPx(mo[0],f)/2))).toFixed(1)+" m";
+  }
+  $("moOut").innerHTML=mo.length?"<span class=note>"+(why||note||"Focal length used: "+f.toFixed(0)+" px")+"</span>":""}
+function moRender(){
+  $("moList").innerHTML=mo.map(function(m,i){return "<div class='row' style='border-top:1px solid var(--border);padding:4px 0'><span><b>O"+(i+1)+"</b> · "+msLen(m).toFixed(1)+" px · <span class='mz'></span></span><button class='alt mox' data-i='"+i+"'>×</button></div>"}).join("");
+  moCalc();draw()}
+$("moList").addEventListener("click",function(e){if(!e.target.classList.contains("mox"))return;mo.splice(+e.target.dataset.i,1);moRender()});
+$("msList").addEventListener("click",function(e){if(e.target.classList.contains("msx")){MSD=null;msScopeD=0;$("msSt").textContent="";msRender();moRender()}});
+function opInputs(){
+  var om=opMode(),h="";
+  if(om==="op1"){h+="<div class='two'><div><label>Range to target (m)</label><input id='opR' type='text' inputmode='decimal'></div><div><label>Known FOV (°)</label><input id='opFv' type='text' inputmode='decimal'></div></div>"}
+  else if(om==="op2"){h+="<div class='two'><div><label>Range to target (m)</label><input id='opR' type='text' inputmode='decimal'></div><div><label>Known object size (m)</label><input id='opS' type='text' inputmode='decimal'></div></div>"}
+  else if(om==="op3"){h+="<div class='two'><div><label>Known object size (m)</label><input id='opS' type='text' inputmode='decimal'></div><div><label>Known FOV (°)</label><input id='opFv' type='text' inputmode='decimal'></div></div>"}
+  $("opInputs").innerHTML=h;moRender()}
+$("opInputs").addEventListener("input",function(e){var t=e.target;if(t.matches("#opR,#opS,#opFv")){moCalc()}});
+$("opInputs").addEventListener("change",function(e){var t=e.target;if(t.matches("#opR,#opS,#opFv")){moCalc()}});
+$("sg").onchange=function(){
+  if(this.checked){
+    $("msE").checked=false;
+    document.querySelectorAll("input[name=msm]").forEach(function(r){r.checked=(r.value==="off")});
+    MSD=null;mo=[];$("msSt").textContent="";msP=null;draw();msRender();moRender();
+  }else{
+    pts=[];draw();stats();cmd();$("csv").value=csvOut();
+  }
+};
+$("msE").onchange=function(){
+  if(this.checked){
+    $("sg").checked=false;pts=[];draw();stats();cmd();$("csv").value=csvOut();
+    var r=document.querySelector("input[name=msm][value=dia]");if(r)r.checked=true;
+    msP=null;draw();msRender();moRender();
+  }else{
+    MSD=null;mo=[];$("msSt").textContent="";msP=null;draw();msRender();moRender();
+  }
+};
+document.querySelectorAll("input[name=msm]").forEach(function(r){r.addEventListener("change",function(){
+  if(!$("msE").checked)return;
+  // enabling a measurement mode disables shot-group mode
+  $("sg").checked=false;pts=[];msP=null;draw();msRender();moRender();all();
+})});
+document.querySelectorAll("input[name=ops]").forEach(function(r){r.addEventListener("change",opInputs)});
+opInputs();
+$("msC").onclick=function(){MSD=null;mo=[];msP=null;scopeC=null;scopeManual=false;msScopeD=0;$("msSt").textContent="";msRender();moRender()};
+resetDefaults();
+solveAll();
+fcUpdate();
+orcUpdate();
+if(elevFromZero()){all();}
+$("kdR1").value="300";$("kdD1").value="1.5";$("kdR2").value="600";$("kdD2").value="4.0";$("kdMass").value="9.8";$("kdOut").innerHTML="";kdErrShown=false;kdLabels();kdRender([],[],"");
+requestAnimationFrame(function(){fit();draw()});
+requestAnimationFrame(function(){fit();draw()});
+})();
+</script>
+<script>
+(function(){
+var b=document.getElementById("kdCopy"),c=document.getElementById("kdCode"),m=document.getElementById("kdCopyMsg");
+if(!b||!c)return;
+function sel(){var r=document.createRange();r.selectNodeContents(c);var g=window.getSelection();g.removeAllRanges();g.addRange(r)}
+b.onclick=function(){
+  var t=c.textContent;
+  function ok(){m.textContent="Copied."}
+  function fb(){sel();try{m.textContent=document.execCommand("copy")?"Copied.":"Selected, press Ctrl+C."}catch(e){m.textContent="Selected, press Ctrl+C."}}
+  try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}
+};
+})();
+</script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var ES_PER_DEV=100,RMS_PER_DEV=50,SIG1=50/Math.SQRT2,FLOOR=0.010000001,RAD2MOA=180/Math.PI*60;
+function n(i){var v=parseFloat(String($(i).value).replace(",","."));return isFinite(v)?v:0}
+function fd(v){return v.toFixed(6).replace(/0+$/,"").replace(/\.$/,"")}
+function invN(p){
+  var a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751832007,-30.66479806614716,2.506628277459239],
+  b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+  c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+  d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416],q,r;
+  if(p<0.02425){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  if(p>0.97575){q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+function calc(){
+  var R=n("erR"),P=n("erP"),sizes=[n("erM"),n("erT")],o=$("erOut"),warn=[],names=["Soldier","Tank"];
+  var okR=R>0&&P>=1&&P<=99.9,z=okR?invN((1+Math.sqrt(P/100))/2):1;
+  function metres(moa){return 2*R*Math.tan(moa/RAD2MOA/2)}
+  var cols=sizes.map(function(s,i){
+    if(!(s>0))return null;
+    if(!okR)return{s:s};
+    var h=Math.atan(s/(2*R))*RAD2MOA,d=h/(z*SIG1),es=d*ES_PER_DEV,rms=d*RMS_PER_DEV;
+    if(d<FLOOR)warn.push(names[i]);
+    return{s:s,d:d,es:es,rms:rms}});
+  function cell(c,f){var v=c?f(c):null;return "<td>"+(v===null||v===undefined?"–":v)+"</td>"}
+  function r(label,f){return "<tr><td>"+label+"</td>"+cell(cols[0],f)+cell(cols[1],f)+"</tr>"}
+  function has(f){return function(c){return c.d===undefined?null:f(c)}}
+  var h="<table class='t4'><tr><th></th><th style='text-align:right'>Soldier</th><th style='text-align:right'>Tank</th></tr>"
+   +r("Target size (m)",function(c){return c.s})
+   +r("<b>Required minDev</b>",has(function(c){return "<b>"+fd(c.d)+(c.d<FLOOR?" ⚠":"")+"</b>"}))
+   +"<tr><th colspan=3>Spread at this minDev</th></tr>"
+   +r("Extreme spread (MOA)",has(function(c){return c.es.toFixed(2)}))
+   +r("RMS (MOA)",has(function(c){return c.rms.toFixed(2)}))
+   +r("Extreme spread (m)",has(function(c){return metres(c.es).toFixed(2)}))
+   +r("RMS (m)",has(function(c){return metres(c.rms).toFixed(2)}))
+   +"</table>";
+  if(warn.length)h+="<div class='kdWarn'>⚠ Below the floor: "+warn.join(", ")+". Values under "+FLOOR+" collapse to zero, so the effective range becomes infinite.</div>";
+  if(P>99.9)h+="<div class='kdWarn'>100% is not possible: the scatter is a bell curve with no hard edge, so a few shots always land outside, however small minDev gets. Only zero deviation (minDev 0.01 or smaller) hits every shot. Enter up to 99.9.</div>";
+  else if(!okR)h+="<div class='note' style='margin-top:3px'>Fill in range and hit chance (1–99.9).</div>";
+  o.innerHTML=h}
+["erM","erT","erR","erP"].forEach(function(i){$(i).addEventListener("input",calc);$(i).addEventListener("change",calc)});
+function reset(){["erM","erT","erR","erP"].forEach(function(i){$(i).value=$(i).defaultValue});calc()}
+window.addEventListener("pageshow",function(e){if(e.persisted)reset()});
+reset();
+})();
+</script>
+<script>
+(function(){
+var rp=document.querySelector(".refpic"),h=rp&&rp.querySelector("h2");
+if(h)h.addEventListener("click",function(){rp.classList.toggle("open")});
+})();
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # BF2-Ballistics-Toolbox
 Ballistic solutions for field of view, bullet drop, rangefinding, deviation.
 
-Keep in mind of the tracer round bug in vanilla Bf2.exe through which tracer rounds have a larger drop
+Be aware of the bug in vanilla Bf2.exe through which tracer rounds have a larger bullet drop
 
 Under development.
 

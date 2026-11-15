@@ -12,3 +12,6 @@ https://alontavor.github.io/
 
 Project Dalian for the .baf readout
 https://github.com/chronic8000/ProjectDalian
+
+Tracer speed fixes:
+Mats391 & Yosik

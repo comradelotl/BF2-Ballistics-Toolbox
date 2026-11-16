@@ -16,7 +16,7 @@ label.chk{display:flex;gap:6px;align-items:center;color:var(--text);font-size:.8
 input,textarea,button{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;box-sizing:border-box}
 input[type=number],input[type=text]{width:100%}input[type=checkbox]{width:auto}
 #hc{width:100%}
-input#bafFile{width:100%}#fa{width:100%}
+input#bafFile{position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;overflow:hidden;padding:0;border:0;pointer-events:none}.bafrow{position:relative;display:flex;align-items:center;gap:10px;flex-wrap:wrap}label.bafbtn{display:inline-block;margin:0;padding:6px 12px;font-size:.85rem;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer}input#bafFile:disabled+label.bafbtn{opacity:.5;cursor:not-allowed}input#bafFile:focus-visible+label.bafbtn{outline:2px solid var(--accent);outline-offset:2px}#bafName{flex:1 1 8em;min-width:0;word-break:break-all}#fa{width:100%}
 textarea{width:100%;height:110px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace}
 button{cursor:pointer;background:var(--accent);color:#fff;border-color:transparent}button.alt{background:var(--bg);color:var(--text);border-color:var(--border)}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.two>div{min-width:0}.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -149,8 +149,10 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):
     <div><label for="gmBase">Soldier camera FOV (rad)</label><input id="gmBase" type="number" step="any" value="1.1"></div>
     <div><label for="gmBaseD">(degree)</label><input id="gmBaseD" type="number" step="any" value="63.0254"></div>
   </div>
+  <div id="boxAlpha" style="display:none">
   <label class="chk"><input id="orc" type="checkbox"> FOV modifier(α): 1 = screen, 0 = AFOV</label>
   <div class="two"><input id="gmSlide" type="range" min="0" max="1" step="0.01" value="1"><input id="gmAlpha" type="number" step="any" min="0" value="1"></div>
+  </div>
 
   <div class="two"><div><label for="fovr">addZoomFactor (rad)</label><input id="fovr" class="big" readonly style="width:14ch"></div><div><label for="fov">Vertical FOV (°)</label><input id="fov" class="big" readonly style="width:14ch"></div></div>
   <div id="gmOut"></div>
@@ -185,12 +187,12 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):
     <input id="hk" type="hidden" value="1.0217">
     <div><label for="hc">Camerabone/mesh1 relative offset</label><input id="hc" type="number" step="any" value="0" readonly></div>
     <div><label for="hrx">relative rotation (°)</label><input id="hrx" type="number" step="any" value="0" readonly></div>
-    <div style="grid-column:1/-1"><label for="bafFile">Read offset from _zoom_stand.baf</label><input id="bafFile" type="file" accept=".baf" disabled></div>
+    <div style="grid-column:1/-1"><label for="bafFile">Read offset from _zoom_stand.baf</label><div class="bafrow"><input id="bafFile" type="file" accept=".baf" disabled><label class="bafbtn" for="bafFile">Choose file</label><span id="bafName" class="note"></span></div></div>
     <div style="grid-column:1/-1"><label for="br">Marks at range (m)</label><input id="br" type="text" value="400,800,1200"></div>
   </div>
   <details class="kdx" id="kdBox"><summary>How To Implement</summary>
     <!-- EXAMPLE CODE: replace the lines inside <code id="kdCode"> below with the example snippet (one line per row, keep it HTML-escaped: &lt; &gt; &amp;) -->
-    <pre class="kdpre"><code id="kdCode">ObjectTemplate.createComponent MultiFireComp <- important
+    <pre class="kdpre"><code id="kdCode">ObjectTemplate.createComponent MultiFireComp
 ObjectTemplate.fire.addBarrelName usrif_m24_barrel
 ...
 ObjectTemplate.addTemplate usrif_m24_barrel
@@ -257,7 +259,7 @@ ObjectTemplate.hasMobilePhysics 0
 </details>
 
 <details class="card"><summary>⑦ Deviation</summary>
-  <p class="note">Get a minDev from a given effective range and target size.</p>
+  <p class="note">Get a minDev from a given effective range and target size, or the hit chance from a given minDev.</p>
   <div class="two">
     <div><label for="erM">Soldier-sized target (m)</label><input id="erM" type="text" inputmode="decimal" autocomplete="off" value="0.45"></div>
     <div><label for="erT">Tank-sized target (m)</label><input id="erT" type="text" inputmode="decimal" autocomplete="off" value="2"></div>
@@ -265,7 +267,12 @@ ObjectTemplate.hasMobilePhysics 0
   <label for="erR">Effective range (m)</label><input id="erR" type="text" inputmode="decimal" autocomplete="off" value="300">
   <label for="erP">Hit chance per shot (%)</label><input id="erP" type="text" inputmode="decimal" autocomplete="off" value="85">
   <div id="erOut"></div>
-  <p class="note"><b>Extreme spread MOA (ES):</b><br> Diameter of the circle within which a typical shot will land<br><b>RMS MOA:</b><br>Typical distance a shot will land from the aimpoint centre <br> <br>minDev = 1.0 ~ 100 ES MOA or ~50 RMS MOA.<br>minDev = 0.01 or smaller will collapse to zero deviation.<br> <br><b>Hit chance:</b><br>Probability that a single shot lands on the target (a square) when aimed at its centre. Assumes round bell-curve scatter with an RMS of 50 MOA at minDev 1.0. Aiming error, bullet drop and target movement are not included.</p>
+  <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+    <label for="erD">Hit chance from minDev (at the effective range and targets above)</label>
+    <input id="erD" type="text" inputmode="decimal" autocomplete="off" value="0.04">
+    <div id="erHit"></div>
+  </div>
+  <p class="note"><b>RMS MOA:</b><br>Typical distance a shot lands from the aimpoint centre. minDev 1.0 gives about 46 RMS MOA (measured on 250 shots).<br><b>Extreme spread MOA (ES):</b><br>Largest distance between any two shots of a group. The values shown are the mean for a 5-shot group, about 2.17 × RMS, so minDev 1.0 gives about 100 MOA. Larger groups spread wider.<br> <br>minDev = 0.01 or smaller will collapse to zero deviation.<br> <br><b>Hit chance:</b><br>Probability that a single shot lands on the target (a square) when aimed at its centre. The scatter is round, centred and bell-curve shaped (checked on 250 measured shots). The plausible range assumes the scatter constant is uncertain by ±10% (95% interval from those shots). Aiming error, bullet drop, target movement and the extra deviation from movement, stance or sustained fire are not included.</p>
 </details>
 
 </div>
@@ -349,6 +356,7 @@ function solveDropMatch(v,r1,d1,r2,d2,bgO){
   return{k:bestK,error:bestErr,approx:bestErr>1e-4};
 }
 function drawMarks(c,sc,cx,cy,pm,lim){
+  if($("be").value==="")return; /* no valid zero: no ladder */
   var bb=ballistic();
   c.font=(12*sc)+"px system-ui,sans-serif";c.textBaseline="middle";
   ranges().forEach(function(x){
@@ -380,10 +388,14 @@ function drawStadia(c,sc,cx,cy,pm,lim,doInf,doTank){
     c.textAlign="start";c.textBaseline="middle"});
 }
 function ranges(){return $("br").value.split(",").map(parseFloat).filter(function(x){return isFinite(x)&&x>=0})}
+function zeroMsg(){
+  if(zeroDeg()!==null)return "";
+  var v=num("bv"),z=num("bz");
+  return "<span class=note>"+(!(v>0)?"Projectile velocity must be greater than 0.":z<0?"The zero range cannot be negative.":z===0?"A zero at 0 m is undefined with a bone offset.":"No elevation reaches this zero range at this velocity.")+"</span>"}
 function ballTable(){
   var rt=ballistic(),pm=fpx()/1000,h="<table>"+row("Effective gravity",rt.g.toFixed(2)+" m/s²")+(rt.d>0?row("Drag k = π·0.01·drag/mass",rt.d.toFixed(5)+" 1/s")+row("Horizontal range limit (≈)",(rt.v*rt.c/rt.d).toFixed(0)+" m"):"")+row("Bone offset (m)",rt.h.toFixed(4))+row("Texture px per mil (800 × 600)",(pm*600/H).toFixed(2))+row("0 m mark",(function(m){return isFinite(m)?(-m).toFixed(2)+" mil above crosshair":"n/a (offset)"})(hold(rt,0)))+row("Far zero point",(function(z){return isFinite(z)?z.toFixed(1)+" m":"–"})(zeroRange(rt)))+head("Range: hold from crosshair");
   ranges().forEach(function(x){var m=hold(rt,x);if(!isFinite(m)){h+=row(x+" m","n/a");return}h+=row(x+" m",Math.abs(m).toFixed(2)+" mil "+(m<0?"above":"below")+" / "+Math.abs(m*pm).toFixed(1)+" px")});
-  $("bt").innerHTML=h+"</table>";
+  $("bt").innerHTML=zeroMsg()||h+"</table>";
   var rr=rfRanges(),t="";
   if($("rf").checked&&rr.length){t="<table>"+head("Rangefinder: infantry target height (mil)");
     rr.forEach(function(x){t+=row(x+" m",(1000*num("rfi")/x).toFixed(2)+" · "+(1000*num("rfi")/x*pm).toFixed(1)+" px")});t+="</table>"}
@@ -433,6 +445,7 @@ function cmd(){
 function csvOut(){var g=parseInt($("gs").value)||0;return "x,y,group\n"+pts.map(function(p,i){return p.x.toFixed(1)+","+p.y.toFixed(1)+","+(g>0?Math.floor(i/g):0)}).join("\n")}
 
 function draw(){
+  cv.style.touchAction=($("sg").checked||$("msE").checked)?"none":"";
   ctx.clearRect(0,0,W,H);
   if(A){var iw=A.naturalWidth||W,ih=A.naturalHeight||H,k=Math.min(W/iw,H/ih),w=iw*k,h=ih*k;ctx.drawImage(A,(W-w)/2,(H-h)/2,w,h);}else{ctx.fillStyle="#222";ctx.fillRect(0,0,W,H)}
   var rc=cv.getBoundingClientRect(),sc=rc.width?W/rc.width:1,cx=W/2,cy=H/2,pm=fpx()/milPerRad();
@@ -464,32 +477,26 @@ function draw(){
 }
 function all(){size();draw();scale();ballTable();flag();stats();cmd();$("csv").value=csvOut();moCalc();fit()}
 
-cv.addEventListener("mousedown",function(e){
-  if(e.button!==0)return;
+cv.addEventListener("pointerdown",function(e){
+  if(e.button!==0||e.isPrimary===false)return;
   var rc=cv.getBoundingClientRect(),sc=W/rc.width,x=(e.clientX-rc.left)*sc,y=(e.clientY-rc.top)*sc;
   dragStart={x:x,y:y};
   var md=$("msE").checked?msMode():"off";
   if(md==="dia"||md==="obj"){var h=hitPoint(x,y);if(h){msP=null;drag=h;draw();return}}
-  cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
 });
-cv.addEventListener("mousemove",function(e){
+window.addEventListener("pointermove",function(e){
   if(!drag)return;
   var rc=cv.getBoundingClientRect(),sc=W/rc.width,x=(e.clientX-rc.left)*sc,y=(e.clientY-rc.top)*sc;
   applyDrag(x,y);draw();moCalc();msRender();
 });
-window.addEventListener("mousemove",function(e){
-  if(!drag)return;
-  var rc=cv.getBoundingClientRect(),sc=W/rc.width,x=(e.clientX-rc.left)*sc,y=(e.clientY-rc.top)*sc;
-  applyDrag(x,y);draw();moCalc();msRender();
-});
-window.addEventListener("mouseup",function(e){
+window.addEventListener("pointercancel",function(){drag=null;dragStart=null});
+window.addEventListener("pointerup",function(e){
   if(e.button!==0)return;
   var rc=cv.getBoundingClientRect(),sc=W/rc.width,x=(e.clientX-rc.left)*sc,y=(e.clientY-rc.top)*sc;
-  if(drag){drag=null;dragStart=null;try{cv.releasePointerCapture&&cv.releasePointerCapture(e.pointerId)}catch(e){}all();return}
+  if(drag){drag=null;dragStart=null;all();return}
   if(!dragStart){return}
   var moved=Math.hypot(x-dragStart.x,y-dragStart.y)>4;
   dragStart=null;
-  try{cv.releasePointerCapture&&cv.releasePointerCapture(e.pointerId)}catch(e){}
   if(moved)return;
   var md=$("msE").checked?msMode():"off";
   if(md==="dia"||md==="obj"){msClick(x,y);return}
@@ -506,15 +513,17 @@ $("apply").onclick=function(){
 };
 $("cp").onclick=function(){try{navigator.clipboard.writeText($("csv").value)}catch(e){$("csv").select()}};
 function elevFromZero(){var z=zeroDeg();if(z===null){$("be").value="";$("kdRot").textContent="-";return false}$("be").value=+(z-num("hrx")).toFixed(4);$("kdRot").textContent=(-num("be")).toFixed(4);return true}
+var multiVals={bz:"100",hc:"-0.1",hrx:"0"},wasMulti=false,bafLoaded="";
+function showBaf(){$("bafName").textContent=$("fcMulti").checked&&bafLoaded?bafLoaded:""}
 function fcUpdate(){
   var multi=$("fcMulti").checked;
   $("be").readOnly=true;
   $("bz").readOnly=!multi;
   $("hc").readOnly=!multi;
   $("bafFile").disabled=!multi;
-  if(!multi){$("bz").value="0";$("hc").value="0";$("hrx").value="0";$("be").value="0";$("kdRot").textContent="-0";$("kdBox").style.display="none";flag();}
-  else{$("kdBox").style.display="";$("bz").value="100";$("hc").value="-0.1";elevFromZero();}
-  all();
+  if(!multi){if(wasMulti)multiVals={bz:$("bz").value,hc:$("hc").value,hrx:$("hrx").value};$("bz").value="0";$("hc").value="0";$("hrx").value="0";$("be").value="0";$("kdRot").textContent="-0";$("kdBox").style.display="none";flag();}
+  else{$("kdBox").style.display="";if(!wasMulti){$("bz").value=multiVals.bz;$("hc").value=multiVals.hc;$("hrx").value=multiVals.hrx}elevFromZero();}
+  wasMulti=multi;showBaf();all();
 }
 $("fcSingle").addEventListener("change",fcUpdate);
 $("fcMulti").addEventListener("change",fcUpdate);
@@ -688,7 +697,7 @@ function tfovWrite(Td){if(Td==null||!isFinite(Td))return null;var u=$("opUnit").
   var d=pn("opDist");return d?+(2*d*(u==="ftyd"?3:1)*Math.tan(Td*DEG/2)).toFixed(2):null}
 function solveModel(){
   OPT_R=0;
-  var base=$("refB").checked,eM=pn("opMag"),O=pn("opObj"),E=pn("opEp"),T=base?null:tfovDeg(),eA=base?null:pn("opAfov"),b=pn("gmBase"),al=parseFloat($("gmAlpha").value),st="";
+  var base=$("refB").checked,eM=pn("opMag"),O=pn("opObj"),E=pn("opEp"),T=base?null:tfovDeg(),eA=base?null:pn("opAfov"),b=pn("gmBase"),al=base?1:parseFloat($("gmAlpha").value),st="";
   var mv=parseFloat(String($("opMag").value).replace(",","."));
   $("opMag").classList.toggle("bad",$("opMag").value!==""&&(!isFinite(mv)||mv<=0));
   if(!isFinite(al)||al<0)al=1;if(eA&&eA>=180){eA=null;$("opAfov").classList.add("bad");$("opAfov").title="AFOV must be < 180°"}else{$("opAfov").classList.remove("bad");$("opAfov").title=""}
@@ -720,7 +729,7 @@ function solveModel(){
   $("opTfov").readOnly=!te&&me&&ae;
   $("opAfov").readOnly=!ae&&me&&te;
   $("opMag").readOnly=!me&&te&&ae;
-  var h="<table>"+row("Magnification",+mag.toFixed(3)+"× ("+src+")")+(base?row("Base camera FOV",b.toFixed(5)+" rad"):row("True FOV",+Tr.toFixed(4)+"°"+(T?"":" (derived)"))+row("AFOV ("+rs+")",ref.toFixed(2)+"°"))+row("Game magnification (M^α, α = "+al+")",mg.toFixed(3)+"×")+(OPT_R>0?row("Ingame scope FOV radius on screen",OPT_R.toFixed(0)+" px ("+(OPT_R/(H0()/2)*100).toFixed(0)+" % of half height)"):"")+row("Focal length",(H0()/2/Math.tan(fr/2)).toFixed(0)+" px")+row("1 mil",pxMil(fr).toFixed(2)+" px ("+milName()+")");
+  var h="<table>"+(base?"":row("Game magnification (M^α, α = "+al+")",mg.toFixed(3)+"×"))+(OPT_R>0?row("Ingame scope FOV radius on screen",OPT_R.toFixed(0)+" px ("+(OPT_R/(H0()/2)*100).toFixed(0)+" % of half height)"):"")+row("Focal length",(H0()/2/Math.tan(fr/2)).toFixed(0)+" px")+row("1 mil",pxMil(fr).toFixed(2)+" px ("+milName()+")");
   $("gmOut").innerHTML=h+"</table>";$("gmStatus").textContent=st;
   var t="<table class=t4><tr><th>Real ×</th><th>Modified ×</th><th>FOV rad</th><th>FOV °</th><th>px / "+milName().toUpperCase()+"</th></tr>";
   [2,3,4,6,8,10,12,20].forEach(function(m){var g=Math.pow(m,al),f=Math.min(base?2*Math.atan(tb/g):tfovFrom(ref,g)*DEG,cap);t+="<tr><td>"+m+"×</td><td>"+g.toFixed(2)+"×</td><td>"+f.toFixed(5)+"</td><td>"+(f/DEG).toFixed(2)+"</td><td>"+pxMil(f).toFixed(2)+"</td></tr>"});
@@ -728,7 +737,7 @@ function solveModel(){
 }
 function solveAll(){
   var b=$("refB").checked;$("gmSlide").value=Math.min(parseFloat($("gmAlpha").value)||0,1);
-  $("boxA").style.display=b?"none":"";$("boxB").style.display=b?"":"none";
+  $("boxAlpha").style.display=b?"none":"";$("boxA").style.display=b?"none":"";$("boxB").style.display=b?"":"none";
   solveModel();all();
 }
 ["opMag","opTfov","opUnit","opDist","opAfov","gmBase","gmAlpha","H","refA","refB","sr"].forEach(function(i){$(i).addEventListener("input",solveAll);$(i).addEventListener("change",solveAll)});
@@ -834,13 +843,14 @@ function readBafBoneOffset(buf,frame){
   var rel=bafMatMul(bafMatInvRigid(ref),tgt);
   return {y:rel[1][3]+CALIB_OFFSET,xDeg:bafEulerX(rel)};
 }
+$("hc").addEventListener("input",function(){bafLoaded="";showBaf()});
 $("bafFile").onchange=function(e){
   var f=e.target.files[0];if(!f)return;
   var r=new FileReader();r.onload=function(ev){
-    var r2=readBafBoneOffset(ev.target.result,0);
-    if(r2===null){$("hc").value="";$("hrx").value="";$("bt").innerHTML="<span class=note>Invalid BAF file.</span>";e.target.value="";return;}
-    $("hc").value=+r2.y.toFixed(6);$("hrx").value=+r2.xDeg.toFixed(4);$("bt").innerHTML="";if(elevFromZero()){all();}
-    e.target.value="";
+    var r2;try{r2=readBafBoneOffset(ev.target.result,0)}catch(x){r2=null}
+    if(r2===null){$("hc").value="";$("hrx").value="";bafLoaded="";$("bt").innerHTML="<span class=note>Invalid BAF file.</span>";$("bafName").textContent="Invalid BAF file: "+f.name;e.target.value="";return;}
+    $("hc").value=+r2.y.toFixed(6);$("hrx").value=+r2.xDeg.toFixed(4);$("bt").innerHTML="";bafLoaded=f.name;showBaf();if(elevFromZero()){all();}
+    e.target.value=""; /* cleared so the same file can be picked again; the name stays in #bafName */
   };r.readAsArrayBuffer(f);
 };
 // ==== Reference-picture measurement management ====
@@ -890,16 +900,17 @@ function moCalc(){
   else if(om==="op2"&&!size)why="Enter a known object size.";
   else if(om==="op3"&&!f)why="Enter a known FOV.";
   else if(om==="op3"&&!size)why="Enter a known object size.";
+  if(!why&&om==="op2"&&mo.length){
+    if(!(msLen(mo[0])>0))why="Object O1 needs a non-zero length.";
+    else f=msLen(mo[0])/2/Math.tan(Math.atan(size/(2*R))); /* focal length calibrated on O1 */
+  }
   mo.forEach(function(m,i){if(!cs[i])return;var a=0;
-    if(!why){
-      if(om==="op1"||om==="op3"){a=msAngPx(m,f)}
-      else if(om==="op2"){var ang=2*Math.atan(size/(2*R));f=msLen(m)/2/Math.tan(ang/2);a=ang}
-    }
-    cs[i].textContent=why?"–":(2*R*Math.tan(a/2)).toFixed(3)+" m · "+(a*milPerRad()).toFixed(2)+" mil"});
+    if(!why)a=msAngPx(m,f);
+    cs[i].textContent=why?"–":om==="op3"?(size/(2*Math.tan(a/2))).toFixed(1)+" m range · "+(a*milPerRad()).toFixed(2)+" mil":(2*R*Math.tan(a/2)).toFixed(3)+" m · "+(a*milPerRad()).toFixed(2)+" mil"});
   var note="";
   if(!why&&mo.length){
     if(om==="op1")note="Object size: "+(2*R*Math.tan(msAngPx(mo[0],f)/2)).toFixed(3)+" m";
-    else if(om==="op2")note="FOV: "+(2*Math.atan((msLen(MSD)/2)/f)/DEG).toFixed(3)+"°";
+    else if(om==="op2")note="FOV: "+(2*Math.atan((msLen(MSD)/2)/f)/DEG).toFixed(3)+"° (calibrated on O1)";
     else if(om==="op3")note="Range: "+(size/(2*Math.tan(msAngPx(mo[0],f)/2))).toFixed(1)+" m";
   }
   $("moOut").innerHTML=mo.length?"<span class=note>"+(why||note||"Focal length used: "+f.toFixed(0)+" px")+"</span>":""}
@@ -968,45 +979,70 @@ b.onclick=function(){
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
-var ES_PER_DEV=100,RMS_PER_DEV=50,SIG1=50/Math.SQRT2,FLOOR=0.010000001,RAD2MOA=180/Math.PI*60;
+var ES5_PER_RMS=2.172,K_DEF=46,UNC=0.10,SQ2=Math.SQRT2,FLOOR=0.010000001,RAD2MOA=180/Math.PI*60;
+var IDS=["erM","erT","erR","erP","erD"];
 function n(i){var v=parseFloat(String($(i).value).replace(",","."));return isFinite(v)?v:0}
 function fd(v){return v.toFixed(6).replace(/0+$/,"").replace(/\.$/,"")}
-function invN(p){
-  var a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751832007,-30.66479806614716,2.506628277459239],
-  b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
-  c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
-  d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416],q,r;
-  if(p<0.02425){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
-  if(p>0.97575){q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
-  q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+function erf(x){var sg=x<0?-1:1;x=Math.abs(x);var t=1/(1+0.3275911*x),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return sg*y}
+function targets(){return ["erM","erT"].map(function(id){var w=n(id);return w>0?{w:w,h:w}:null})}
+function halfMoa(s,R){return Math.atan(s/(2*R))*RAD2MOA}
+/* hit probability of a w x h rectangle for round scatter with per-axis sigma (MOA) */
+function pHit(t,R,sig){
+  if(!(sig>0))return 1;
+  return erf(halfMoa(t.w,R)/(sig*SQ2))*erf(halfMoa(t.h,R)/(sig*SQ2))}
+/* per-axis total sigma that gives hit probability P (0..1); pHit falls monotonically with sigma */
+function solveSig(t,R,P){
+  var lo=0,hi=1;while(pHit(t,R,hi)>P&&hi<1e9)hi*=2;
+  for(var i=0;i<90;i++){var m=(lo+hi)/2;if(pHit(t,R,m)>P)lo=m;else hi=m}
+  return (lo+hi)/2}
+function sigOf(d,k){return d*k/SQ2}
+function pctTxt(p){return p>=0.9995?"&gt; 99.9":(p*100).toFixed(1)}
+function tgtTxt(t){return t.w}
+function hitCalc(){
+  var R=n("erR"),D=n("erD"),T=targets(),o=$("erHit"),k=K_DEF;
+  if(!(R>0)||!(D>0)){o.innerHTML="<div class='note' style='margin-top:3px'>Fill in range and minDev.</div>";return}
+  var zero=D<FLOOR;   /* zero deviation: every shot hits */
+  function cell(v){return "<td style='padding-left:12px;white-space:nowrap'>"+(v===null?"–":v)+"</td>"}
+  function row(label,f){return "<tr><td>"+label+"</td>"+cell(T[0]?f(T[0]):null)+cell(T[1]?f(T[1]):null)+"</tr>"}
+  var h="<table class='t4'><tr><th></th><th style='text-align:right'>Soldier</th><th style='text-align:right'>Tank</th></tr>"
+   +row("Target size (m)",tgtTxt)
+   +row("<b>Hit chance (%)</b>",function(t){return zero?"<b>100 (zero deviation)</b>":"<b>"+pctTxt(pHit(t,R,sigOf(D,k)))+"</b>"})
+   +row("Plausible range (%)",function(t){
+      if(zero)return null;   /* no weapon scatter, so the constant's uncertainty does not matter */
+      var lo=pctTxt(pHit(t,R,sigOf(D,k*(1+UNC)))),hi=pctTxt(pHit(t,R,sigOf(D,k*(1-UNC))));
+      return lo===hi?lo:lo+" – "+hi})
+   +"</table>";
+  if(zero)h+="<div class='kdWarn'>⚠ minDev below "+FLOOR+" collapses to zero deviation, so every shot hits.</div>";
+  o.innerHTML=h}
 function calc(){
-  var R=n("erR"),P=n("erP"),sizes=[n("erM"),n("erT")],o=$("erOut"),warn=[],names=["Soldier","Tank"];
-  var okR=R>0&&P>=1&&P<=99.9,z=okR?invN((1+Math.sqrt(P/100))/2):1;
+  hitCalc();
+  var R=n("erR"),P=n("erP"),T=targets(),o=$("erOut"),k=K_DEF,warn=[],names=["Soldier","Tank"];
+  var okR=R>0&&P>=1&&P<=99.9;
   function metres(moa){return 2*R*Math.tan(moa/RAD2MOA/2)}
-  var cols=sizes.map(function(s,i){
-    if(!(s>0))return null;
-    if(!okR)return{s:s};
-    var h=Math.atan(s/(2*R))*RAD2MOA,d=h/(z*SIG1),es=d*ES_PER_DEV,rms=d*RMS_PER_DEV;
+  var cols=T.map(function(t,i){
+    if(!t)return null;
+    if(!okR)return{t:t};
+    var d=solveSig(t,R,P/100)*SQ2/k,rms=d*k,es=rms*ES5_PER_RMS;
     if(d<FLOOR)warn.push(names[i]);
-    return{s:s,d:d,es:es,rms:rms}});
-  function cell(c,f){var v=c?f(c):null;return "<td>"+(v===null||v===undefined?"–":v)+"</td>"}
+    return{t:t,d:d,es:es,rms:rms}});
+  function cell(c,f){var v=c?f(c):null;return "<td style='padding-left:12px;white-space:nowrap'>"+(v===null||v===undefined?"–":v)+"</td>"}
   function r(label,f){return "<tr><td>"+label+"</td>"+cell(cols[0],f)+cell(cols[1],f)+"</tr>"}
   function has(f){return function(c){return c.d===undefined?null:f(c)}}
   var h="<table class='t4'><tr><th></th><th style='text-align:right'>Soldier</th><th style='text-align:right'>Tank</th></tr>"
-   +r("Target size (m)",function(c){return c.s})
+   +r("Target size (m)",function(c){return tgtTxt(c.t)})
    +r("<b>Required minDev</b>",has(function(c){return "<b>"+fd(c.d)+(c.d<FLOOR?" ⚠":"")+"</b>"}))
    +"<tr><th colspan=3>Spread at this minDev</th></tr>"
-   +r("Extreme spread (MOA)",has(function(c){return c.es.toFixed(2)}))
+   +r("Mean ES, 5 shots (MOA)",has(function(c){return c.es.toFixed(2)}))
    +r("RMS (MOA)",has(function(c){return c.rms.toFixed(2)}))
-   +r("Extreme spread (m)",has(function(c){return metres(c.es).toFixed(2)}))
+   +r("Mean ES, 5 shots (m)",has(function(c){return metres(c.es).toFixed(2)}))
    +r("RMS (m)",has(function(c){return metres(c.rms).toFixed(2)}))
    +"</table>";
   if(warn.length)h+="<div class='kdWarn'>⚠ Below the floor: "+warn.join(", ")+". Values under "+FLOOR+" collapse to zero, so the effective range becomes infinite.</div>";
   if(P>99.9)h+="<div class='kdWarn'>100% is not possible: the scatter is a bell curve with no hard edge, so a few shots always land outside, however small minDev gets. Only zero deviation (minDev 0.01 or smaller) hits every shot. Enter up to 99.9.</div>";
   else if(!okR)h+="<div class='note' style='margin-top:3px'>Fill in range and hit chance (1–99.9).</div>";
   o.innerHTML=h}
-["erM","erT","erR","erP"].forEach(function(i){$(i).addEventListener("input",calc);$(i).addEventListener("change",calc)});
-function reset(){["erM","erT","erR","erP"].forEach(function(i){$(i).value=$(i).defaultValue});calc()}
+IDS.forEach(function(i){$(i).addEventListener("input",calc);$(i).addEventListener("change",calc)});
+function reset(){IDS.forEach(function(i){$(i).value=$(i).defaultValue});calc()}
 window.addEventListener("pageshow",function(e){if(e.persisted)reset()});
 reset();
 })();

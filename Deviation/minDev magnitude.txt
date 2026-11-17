@@ -9,10 +9,15 @@ Camera FOV 0.17453 = 10°, or 600 MOA, or 600/1080 = 0.555 MOA per pixel.
 
 Method: 5-shot groups, measuring the pixel distance of the two most distant shots in MOA.
 
-Results: average of 104.4204819 MOA
+Results: average of 104.4204819 MOA 
 and a standard deviation of ~30 MOA
 
 Conclusion 0.01 is ~1 MOA ±0.3 SD
+
+I doubt that the devs parametrized minDev as MOA. 
+Alternative interpretations that fit into the uncertainty range would include 
+1.75 degree, which is 105 MOA or
+0.03 radians, which is 103.13 MOA.
 
 Shot group results in MOA:
 79

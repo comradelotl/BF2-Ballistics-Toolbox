@@ -1,6 +1,7 @@
 FOV: 2 degrees
 focal length 30937 px
 zero gravity
+minDev 0.154076
 
 5-shot groups
 x-y coordinates on a 1920x1080px screen

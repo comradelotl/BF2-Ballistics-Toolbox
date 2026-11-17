@@ -7,7 +7,7 @@ Test gun: Phallanx
 Screen resolution 1920x1080
 Camera FOV 0.17453 = 10°, or 600 MOA, or 600/1080 = 0.555 MOA per pixel.
 
-Method: 5-shot groups, measuring the pixel distance of the two most distant shots in MOA.
+Method: 5-shot groups, measuring the pixel distance of the two most distant shots in MOA (Extreme spread)
 
 Results: average of 104.4204819 MOA 
 and a standard deviation of ~30 MOA

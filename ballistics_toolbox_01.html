@@ -259,16 +259,16 @@ ObjectTemplate.hasMobilePhysics 0
 </details>
 
 <details class="card"><summary>⑦ Deviation</summary>
-  <p class="note">Get a minDev from a given range and target size, or the hit chance from a given minDev.</p>
+  <p class="note">Get a minDev from a desired hit probability at a set distance and target size</p>
   <div class="two">
     <div><label for="erM">Soldier-sized target (m)</label><input id="erM" type="text" inputmode="decimal" autocomplete="off" value="0.45"></div>
     <div><label for="erT">Tank-sized target (m)</label><input id="erT" type="text" inputmode="decimal" autocomplete="off" value="2"></div>
   </div>
   <label for="erR">Range (m)</label><input id="erR" type="text" inputmode="decimal" autocomplete="off" value="300">
-  <label for="erP">Hit chance per shot (%)</label><input id="erP" type="text" inputmode="decimal" autocomplete="off" value="85">
+  <label for="erP">Hit probability per shot (%)</label><input id="erP" type="text" inputmode="decimal" autocomplete="off" value="85">
   <div id="erOut"></div>
   <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
-    <label for="erD">Input a minDev to get the chance of hitting a square target at a given range and target size</label>
+    <label for="erD">Input a minDev to get the probability of hitting a square target at a set distance and target size</label>
     <input id="erD" type="text" inputmode="decimal" autocomplete="off" value="0.04">
     <div id="erHit"></div>
     <label class="chk"><input id="hm" type="checkbox"> Show hit probability zones</label>

@@ -271,9 +271,9 @@ ObjectTemplate.hasMobilePhysics 0
     <label for="erD">Input a minDev to get the probability of hitting a square target at a set distance and target size</label>
     <input id="erD" type="text" inputmode="decimal" autocomplete="off" value="0.04">
     <div id="erHit"></div>
-    <label class="chk"><input id="hm" type="checkbox"> Show hit probability zones</label>
+    <label class="chk"><input id="hm" type="checkbox"> Show hit probability visualizer</label>
     <label class="chk"><input id="hmT" type="checkbox"> Show soldier and tank targets</label>
-    <p class="note">Four zones hold all shots: red (25%), yellow (50 %), green (75%), blue (99%). The ring represents the average distance of a shot from the aim point.</p>
+    <p class="note">minDev is independent of zoom level, decrease the FOV to better view the visualizer. Four zones hold all shots: red (25%), yellow (50 %), green (75%), blue (99%). The ring represents the average distance of a shot from the aim point.</p>
   </div>
   <p class="note"><b>RMS MOA:</b><br>Typical distance a shot lands from the aimpoint centre. minDev 1.0 gives about 46 RMS MOA (measured on 250 shots).<br><b>Extreme spread MOA (ES):</b>
   <br>Largest distance between any two shots of a group. The values shown are the mean for a 5-shot group, about 2.17 × RMS, so minDev 1.0 gives about 100 MOA. Larger groups spread wider.<br>
